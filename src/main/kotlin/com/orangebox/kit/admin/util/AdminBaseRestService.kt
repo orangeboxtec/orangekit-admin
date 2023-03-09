@@ -1,18 +1,22 @@
 package com.orangebox.kit.admin.util
 
-import org.startupkit.admin.userb.UserB
+import com.orangebox.kit.admin.userb.UserB
+import com.orangebox.kit.admin.userb.UserBService
+import javax.inject.Inject
+import javax.ws.rs.NotAuthorizedException
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.HttpHeaders
 
 open class AdminBaseRestService {
+
     @Context
     private val request: HttpServletRequest? = null
 
-    @EJB
-    private val userBFacade: UserBService? = null
+    @Inject
+    private lateinit var userBService: UserBService
 
     @get:Throws(Exception::class)
-    protected val userTokenSession: UserB
+    protected val userTokenSession: UserB?
         protected get() {
 
             // Get the HTTP Authorization header from the request
@@ -25,6 +29,6 @@ open class AdminBaseRestService {
 
             // Extract the token from the HTTP Authorization header
             val token = authorizationHeader.substring("Bearer".length).trim { it <= ' ' }
-            return userBFacade.retrieveByToken(token)
+            return userBService.retrieveByToken(token)
         }
 }

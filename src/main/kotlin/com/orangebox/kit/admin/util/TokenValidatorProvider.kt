@@ -1,19 +1,22 @@
 package com.orangebox.kit.admin.util
 
-import org.startupkit.admin.userb.UserBTokenValidatorService
+import com.orangebox.kit.admin.userb.UserBTokenValidatorService
 import java.util.*
 import javax.annotation.PostConstruct
+import javax.enterprise.context.ApplicationScoped
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.naming.InitialContext
 
 @Singleton
-@ConcurrencyManagement(ConcurrencyManagementType.CONTAINER)
+@ApplicationScoped
 class TokenValidatorProvider {
-    @get:Lock(LockType.READ)
-    var tokenValidator: TokenValidator? = null
-        private set
 
-    @EJB
-    private val userBTokenValidatorService: UserBTokenValidatorService? = null
+    var tokenValidator: TokenValidator? = null
+
+    @Inject
+    private lateinit var userBTokenValidatorService: UserBTokenValidatorService
+
     @PostConstruct
     fun init() {
         try {

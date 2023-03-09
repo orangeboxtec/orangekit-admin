@@ -1,9 +1,13 @@
 package com.orangebox.kit.admin.util
 
-import org.startupkit.admin.userb.UserBService
+import com.orangebox.kit.admin.userb.UserBService
 import java.io.IOException
 import javax.annotation.Priority
+import javax.inject.Inject
+import javax.ws.rs.NotAuthorizedException
 import javax.ws.rs.Priorities
+import javax.ws.rs.container.ContainerRequestContext
+import javax.ws.rs.container.ContainerRequestFilter
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.HttpHeaders
 import javax.ws.rs.core.Response
@@ -13,11 +17,13 @@ import javax.ws.rs.ext.Provider
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 class AuthenticationFilter : ContainerRequestFilter {
+
     @Context
     private val request: HttpServletRequest? = null
 
-    @EJB
-    private val userBFacade: UserBService? = null
+    @Inject
+    private lateinit var userBService: UserBService
+
     @Throws(IOException::class)
     override fun filter(requestContext: ContainerRequestContext) {
 
@@ -46,7 +52,7 @@ class AuthenticationFilter : ContainerRequestFilter {
 
     @Throws(Exception::class)
     private fun validateToken(token: String) {
-        val validated: Boolean = userBFacade.checkToken(token)
+        val validated: Boolean = userBService.checkToken(token) == true
         if (!validated) {
             throw Exception("Invalid Token")
         }
@@ -54,7 +60,7 @@ class AuthenticationFilter : ContainerRequestFilter {
 
     @Throws(Exception::class)
     private fun validateUrl(token: String, url: String) {
-        val validated: Boolean = userBFacade.checkAcessRole(token, url)
+        val validated: Boolean = userBService.checkAcessRole(token, url) == true
         if (!validated) {
             throw Exception("Unauthorized Url")
         }

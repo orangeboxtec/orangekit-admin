@@ -1,13 +1,19 @@
 package com.orangebox.kit.admin.userb
 
+import com.orangebox.kit.admin.role.BackofficeRole
+import com.orangebox.kit.admin.role.BackofficeRoleDAO
+import com.orangebox.kit.admin.util.TokenValidatorProvider
+import com.orangebox.kit.authkey.UserAuthKeyService
 import com.orangebox.kit.core.configuration.ConfigurationService
+import com.orangebox.kit.core.exception.BusinessException
+import com.orangebox.kit.core.utils.SecUtils
+import com.orangebox.kit.notification.NotificationService
 import org.apache.commons.collections.CollectionUtils
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
-import javax.enterprise.inject.New
 import javax.inject.Inject
 
 @ApplicationScoped
@@ -19,19 +25,18 @@ class UserBService {
     @Inject
     private lateinit var userAuthKeyService: UserAuthKeyService
 
-    @EJB
-    private val notificationService: NotificationService? = null
+    @Inject
+    private lateinit var notificationService: NotificationService
 
     @Inject
-    @New
-    private val userBDAO: UserBDAO? = null
+    private lateinit var userBDAO: UserBDAO
 
     @Inject
-    @New
-    private val backofficeRoleDAO: BackofficeRoleDAO? = null
+    private lateinit var backofficeRoleDAO: BackofficeRoleDAO
 
-    @EJB
-    protected var tokenValidatorProvider: TokenValidatorProvider? = null
+    @Inject
+    protected lateinit var tokenValidatorProvider: TokenValidatorProvider
+
     private val QUANTITY_PAGE = 12
     @PostConstruct
     fun pos() {
@@ -39,15 +44,13 @@ class UserBService {
         Logger.getLogger("org.hibernate.search.reader.impl.ManagedMultiReader").level = Level.SEVERE
     }
 
-    @Throws(Exception::class)
-    override fun authenticateMobile(user: UserB?): UserB? {
-        return authenticateMobile(user, user!!.password)
+    fun authenticateMobile(user: UserB): UserB? {
+        return authenticateMobile(user, user.password!!)
     }
 
-    @Throws(Exception::class)
-    private fun authenticateMobile(user: UserB?, password: String?): UserB {
+    fun authenticateMobile(user: UserB, password: String): UserB {
         var userDB: UserB? = null
-        userDB = retrieveByEmail(user!!.email)
+        userDB = retrieveByEmail(user.email)
         if (userDB == null) {
             throw BusinessException("user_not_found")
         }
@@ -61,13 +64,13 @@ class UserBService {
         userDB.tokenExpirationDate = expCal.time
         userBDAO.update(userDB)
         if (userDB.idRole != null) {
-            val role: BackofficeRole = backofficeRoleDAO.retrieve(BackofficeRole(userDB.idRole))
+            val role = backofficeRoleDAO.retrieve(BackofficeRole(userDB.idRole))
             userDB.setRole(role)
         }
         return if (userDB.status != UserBStatusEnum.BLOCKED) {
             userDB
         } else {
-            throw BusinessException("User blocked")
+            throw BusinessException("user_blocked")
         }
     }
 
