@@ -1,6 +1,7 @@
 package com.orangebox.kit.admin.userb
 
 import com.orangebox.kit.admin.role.BackofficeRole
+import com.orangebox.kit.core.address.AddressInfo
 import com.orangebox.kit.core.annotation.OKEntity
 import com.orangebox.kit.core.annotation.OKId
 import java.util.*

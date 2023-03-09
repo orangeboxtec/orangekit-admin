@@ -1,13 +1,13 @@
 package com.orangebox.kit.admin.userb
 
-import org.startupkit.core.dao.AbstractDAO
+import com.orangebox.kit.core.dao.AbstractDAO
 
-class UserBDAO : AbstractDAO<UserB?>(UserB::class.java) {
-    fun getId(user: UserB): Any? {
+class UserBDAO : AbstractDAO<UserB>(UserB::class.java) {
+    override fun getId(user: UserB): Any? {
         return user.id
     }
 
-    fun listByInfo(infoKey: String, infoValue: String?): List<UserB> {
+    fun listByInfo(infoKey: String, infoValue: String): List<UserB>? {
         return search(
             createBuilder()
                 .appendParamQuery("info.$infoKey", infoValue)
@@ -15,7 +15,7 @@ class UserBDAO : AbstractDAO<UserB?>(UserB::class.java) {
         )
     }
 
-    fun listByOfficeRole(idOffice: String?, idBackofficeRole: String?): List<UserB> {
+    fun listByOfficeRole(idOffice: String, idBackofficeRole: String): List<UserB>? {
         return search(
             createBuilder()
                 .appendParamQuery("info.idOffice", idOffice)
@@ -24,7 +24,7 @@ class UserBDAO : AbstractDAO<UserB?>(UserB::class.java) {
         )
     }
 
-    fun listByOfficeRoleDepartment(idOffice: String?, idBackofficeRole: String?, idDepartment: String?): List<UserB> {
+    fun listByOfficeRoleDepartment(idOffice: String, idBackofficeRole: String, idDepartment: String): List<UserB>? {
         return search(
             createBuilder()
                 .appendParamQuery("info.idOffice", idOffice)

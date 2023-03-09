@@ -18,7 +18,7 @@ class MSKAdminBoot {
         configurationService.checkAndSave("PROJECT_URL", "https://www.startupkit.cloud")
         configurationService.checkAndSave("PROJECT_LOGO_URL", "http://admin.startupkit.mangotest.com/img/mango.png")
         configurationService.checkAndSave("USER_BACKOFFICE_EMAIL_FORGET_ID", "1080189")
-        val mailData: MutableMap<String, String> = HashMap()
+        val mailData: HashMap<String, String> = HashMap()
         mailData["host"] = "in-v3.mailjet.com"
         mailData["user"] = "3035e159bcfe348965116e5baaed4a08"
         mailData["password"] = "8a75c152b65f9e03671c879a22a02171"

@@ -1,6 +1,5 @@
 package com.orangebox.kit.admin.role
 
-import com.orangebox.kit.admin.userb.UserBService
 import com.orangebox.kit.admin.util.AdminBaseRestService
 import javax.inject.Inject
 import javax.ws.rs.Consumes

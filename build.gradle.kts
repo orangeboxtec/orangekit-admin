@@ -26,6 +26,8 @@ dependencies {
     implementation("io.quarkus:quarkus-resteasy-reactive")
     implementation("com.orangebox.kit.core:orangekit-core:0.0.10")
 
+    implementation("com.orangebox.kit.core:orangekit-core:1.0.4")
+    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.0")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
