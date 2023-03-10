@@ -5,10 +5,8 @@ import java.util.*
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
-import javax.inject.Singleton
 import javax.naming.InitialContext
 
-@Singleton
 @ApplicationScoped
 class TokenValidatorProvider {
 
@@ -22,9 +20,7 @@ class TokenValidatorProvider {
         try {
             val bundle = ResourceBundle.getBundle("db")
             val validator = bundle.getString("tokenValidator")
-            tokenValidator = if (validator == null) {
-                userBTokenValidatorService
-            } else {
+            tokenValidator = run {
                 val ctx = InitialContext()
                 val tv = ctx.lookup(validator) as TokenValidator
                 tv

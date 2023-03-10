@@ -137,6 +137,9 @@ class UserBService {
         if (user.status == null) {
             user.status = UserBStatusEnum.ACTIVE
         }
+        if (user.language == null) {
+            user.language = "pt"
+        }
         if (user.password != null) {
             user.salt = SecUtils.salt
             user.password = SecUtils.generateHash(user.salt, user.password!!)
