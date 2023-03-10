@@ -3,12 +3,19 @@ package com.orangebox.kit.admin.userb
 import com.orangebox.kit.admin.role.BackofficeRole
 import com.orangebox.kit.admin.role.BackofficeRoleDAO
 import com.orangebox.kit.admin.util.TokenValidatorProvider
+import com.orangebox.kit.authkey.UserAuthKey
 import com.orangebox.kit.authkey.UserAuthKeyService
+import com.orangebox.kit.authkey.UserAuthKeyTypeEnum
 import com.orangebox.kit.core.configuration.ConfigurationService
+import com.orangebox.kit.core.dao.OperationEnum
+import com.orangebox.kit.core.dao.SearchBuilder
+import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.exception.BusinessException
 import com.orangebox.kit.core.utils.SecUtils
+import com.orangebox.kit.notification.NotificationBuilder
 import com.orangebox.kit.notification.NotificationService
-import org.apache.commons.collections.CollectionUtils
+import com.orangebox.kit.notification.TypeSendingNotificationEnum
+import com.orangebox.kit.notification.email.data.EmailDataTemplate
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -44,16 +51,12 @@ class UserBService {
         Logger.getLogger("org.hibernate.search.reader.impl.ManagedMultiReader").level = Level.SEVERE
     }
 
-    fun authenticateMobile(user: UserB): UserB? {
+    fun authenticateMobile(user: UserB): UserB {
         return authenticateMobile(user, user.password!!)
     }
 
     fun authenticateMobile(user: UserB, password: String): UserB {
-        var userDB: UserB? = null
-        userDB = retrieveByEmail(user.email)
-        if (userDB == null) {
-            throw BusinessException("user_not_found")
-        }
+        val userDB = retrieveByEmail(user.email!!) ?: throw BusinessException("user_not_found")
         val passHash: String = SecUtils.generateHash(userDB.salt, password)
         if (userDB.password != passHash) {
             throw BusinessException("invalid_password")
@@ -65,7 +68,7 @@ class UserBService {
         userBDAO.update(userDB)
         if (userDB.idRole != null) {
             val role = backofficeRoleDAO.retrieve(BackofficeRole(userDB.idRole))
-            userDB.setRole(role)
+            userDB.role = role
         }
         return if (userDB.status != UserBStatusEnum.BLOCKED) {
             userDB
@@ -74,32 +77,30 @@ class UserBService {
         }
     }
 
-    @Throws(Exception::class)
-    override fun authenticate(user: UserB?): LoginInfo? {
-        var info: LoginInfo? = null
+    fun authenticate(user: UserB): LoginInfo? {
+        var info: LoginInfo?
         val userDB = authenticateMobile(user)
         info = LoginInfo()
-        info.token = userDB!!.token
+        info.token = userDB.token
         info.userID = userDB.id
         info.idObj = userDB.idObj
-        if (userDB.role != null && userDB.role.getRoles() != null) {
-            val role: Role = userDB.role.getRoles().stream()
-                .filter { p -> p.getFgHome() != null && p.getFgHome() }
-                .findFirst()
-                .orElse(null)
+        if (userDB.role != null && userDB.role?.roles != null) {
+            val role = userDB.role?.roles?.stream()
+                ?.filter { p -> p.fgHome != null && p.fgHome!! }
+                ?.findFirst()
+                ?.orElse(null)
             if (role != null) {
-                info.urlHome = role.getUrl()
+                info.urlHome = role.url
             }
         }
         return if (userDB.status != UserBStatusEnum.BLOCKED) {
             info
         } else {
-            throw BusinessException("User blocked")
+            throw BusinessException("user_blocked")
         }
     }
 
-    @Throws(Exception::class)
-    private fun createToken(userDB: UserB) {
+    fun createToken(userDB: UserB) {
         userDB.token = UUID.randomUUID().toString()
         val expCal = Calendar.getInstance()
         expCal.add(Calendar.HOUR, 12)
@@ -107,18 +108,16 @@ class UserBService {
         userBDAO.update(userDB)
     }
 
-    @Throws(Exception::class)
-    override fun checkToken(token: String?): Boolean? {
-        return tokenValidatorProvider.getTokenValidator().checkToken(token)
+    fun checkToken(token: String): Boolean? {
+        return tokenValidatorProvider.tokenValidator?.checkToken(token)
     }
 
-    @Throws(Exception::class)
-    override fun checkAcessRole(token: String?, url: String?): Boolean? {
+    fun checkAcessRole(token: String, url: String): Boolean? {
         var validated = false
         val user = retrieveByToken(token)
-        if (user!!.role != null && user.role.getRoles() != null) {
-            for (role in user.role.getRoles()) {
-                if (url.indexOf(role.getUrl()) != -1) {
+        if (user!!.role != null && user.role?.roles != null) {
+            for (role in user.role?.roles!!) {
+                if (url.contains(role.url!!)) {
                     validated = true
                     break
                 }
@@ -127,11 +126,10 @@ class UserBService {
         return validated
     }
 
-    @Throws(Exception::class)
-    override fun createNewUser(user: UserB?): UserB? {
+    fun createNewUser(user: UserB): UserB? {
         var userDB: UserB? = null
-        if (user!!.email != null && user.email != "") {
-            userDB = retrieveByEmail(user.email)
+        if (user.email != null && user.email != "") {
+            userDB = retrieveByEmail(user.email!!)
         }
         if (userDB != null) {
             throw BusinessException("email_already_registred")
@@ -140,48 +138,42 @@ class UserBService {
             user.status = UserBStatusEnum.ACTIVE
         }
         if (user.password != null) {
-            user.salt = SecUtils.getSalt()
-            user.password = SecUtils.generateHash(user.salt, user.password)
+            user.salt = SecUtils.salt
+            user.password = SecUtils.generateHash(user.salt, user.password!!)
         }
         user.creationDate = Date()
         if (user.role != null) {
-            user.setRole(retrieveRole(user.role.getId()))
+            user.role = retrieveRole(user.role!!.id)
         }
         userBDAO.insert(user)
-        val key: UserAuthKey = userAuthKeyService.createKey(user.id, UserAuthKeyTypeEnum.EMAIL)
+        val key = userAuthKeyService.createKey(user.id!!, UserAuthKeyTypeEnum.EMAIL)
         if (user.language == null) {
             user.language = "pt_BR"
         }
-        val projectNameConf: Configuration = configurationService.loadByCode("PROJECT_NAME")
-        var projectName = "Project"
-        if (projectNameConf != null) {
-            projectName = projectNameConf.getValue()
-        }
-        val title: String = MessageUtils.message(user.language, "user.confirm.email.title", projectName)
-        val idEmailConfe: Configuration = configurationService.loadByCode("USER_BACKOFFICE_EMAIL_CONFIRM_ID")
-        if (idEmailConfe != null && user.password == null) {
-            val templateId: Int = configurationService.loadByCode("USER_BACKOFFICE_EMAIL_CONFIRM_ID").getValueAsInt()
-            val msg = "definir"
-            val link: String = configurationService.loadByCode("USER_BACKOFFICE_EMAIL_CONFIRM_LINK").getValue()
-                .replaceAll("__LANGUAGE__", user.language!!.substring(1))
-                .replaceAll("__KEY__", key.getKey())
-                .replaceAll("__USER__", user.id)
-                .replaceAll("__TYPE__", key.getType().toString())
+
+        val templateId = configurationService.loadByCode("PT_USER_BACKOFFICE_EMAIL_CONFIRM_ID")
+        if (templateId != null && user.password == null) {
+            val link: String? = configurationService.loadByCode("USER_BACKOFFICE_EMAIL_CONFIRM_LINK")?.value
+                ?.replace("__LANGUAGE__", user.language!!.substring(1))
+                ?.replace("__KEY__", key.key!!)
+                ?.replace("__USER__", user.id!!)
+                ?.replace("__TYPE__", key.type.toString())
+
             notificationService.sendNotification(
                 NotificationBuilder()
                     .setTo(user)
                     .setTypeSending(TypeSendingNotificationEnum.EMAIL)
-                    .setTitle(title)
                     .setFgAlertOnly(true)
-                    .setEmailDataTemplate(object : EmailDataTemplate() {
-                        val data: Map<String, Any?>
+                    .setEmailDataTemplate(object : EmailDataTemplate {
+                        override val data: Map<String?, Any?>
                             get() {
-                                val params: MutableMap<String, Any?> = HashMap()
+                                val params: MutableMap<String?, Any?> = HashMap()
                                 params["user_name"] = user.name
-                                params["msg"] = msg
                                 params["confirmation_link"] = link
                                 return params
                             }
+                        override val templateId: Int?
+                            get() = templateId.value?.toInt()
                     })
                     .build()
             )
@@ -189,16 +181,15 @@ class UserBService {
         return userDB
     }
 
-    @Throws(Exception::class)
-    override fun updateUser(user: UserB?) {
+    fun updateUser(user: UserB) {
         var userDBEmail: UserB? = null
-        if (user!!.email != null && user.email != "") {
-            userDBEmail = retrieveByEmail(user.email)
+        if (user.email != null && user.email != "") {
+            userDBEmail = retrieveByEmail(user.email!!)
         }
         if (userDBEmail != null && userDBEmail.id != user.id) {
             throw BusinessException("email_already_registred")
         }
-        val userDB: UserB = userBDAO.retrieve(UserB(user.id))
+        val userDB = userBDAO.retrieve(UserB(user.id))!!
         if (user.emailConfirmed != null) {
             userDB.emailConfirmed = user.emailConfirmed
         }
@@ -218,13 +209,7 @@ class UserBService {
             userDB.email = user.email
         }
         if (user.info != null) {
-            userDB.setInfo(user.info)
-        }
-        if (user.keyAndroid != null) {
-            userDB.keyAndroid = user.keyAndroid
-        }
-        if (user.keyIOS != null) {
-            userDB.keyIOS = user.keyIOS
+            userDB.info = user.info
         }
         if (user.name != null) {
             userDB.name = user.name
@@ -245,8 +230,8 @@ class UserBService {
             userDB.phoneNumber = user.phoneNumber
         }
         if (user.role != null) {
-            val role: BackofficeRole = backofficeRoleDAO.retrieve(user.role)
-            userDB.setRole(role)
+            val role = backofficeRoleDAO.retrieve(user.role!!)
+            userDB.role = role
         }
         if (user.status != null) {
             userDB.status = user.status
@@ -263,29 +248,14 @@ class UserBService {
         userBDAO.update(userDB)
     }
 
-    @Throws(Exception::class)
-    override fun updatePassword(user: UserB?) {
-        val userBase = authenticateMobile(user, user!!.oldPassword)
-        if (userBase != null) {
-            userBase.salt = SecUtils.getSalt()
-            userBase.password = SecUtils.generateHash(userBase.salt, user.password)
-            userBDAO.update(userBase)
-        }
+    fun updatePassword(user: UserB) {
+        val userBase = authenticateMobile(user, user.oldPassword!!)
+        userBase.salt = SecUtils.salt
+        userBase.password = SecUtils.generateHash(userBase.salt, user.password!!)
+        userBDAO.update(userBase)
     }
 
-    @Deprecated("")
-    @Throws(Exception::class)
-    override fun updatePasswordForgot(user: UserB?) {
-        val userBase: UserB = userBDAO.retrieve(user)
-        if (userBase != null) {
-            userBase.salt = SecUtils.getSalt()
-            userBase.password = SecUtils.generateHash(userBase.salt, user!!.password)
-            userBDAO.update(userBase)
-        }
-    }
-
-    @Throws(Exception::class)
-    override fun saveUser(user: UserB?) {
+    fun saveUser(user: UserB?) {
         if (user!!.id == null) {
             createNewUser(user)
         } else {
@@ -293,190 +263,127 @@ class UserBService {
         }
     }
 
-    @Throws(Exception::class)
-    override fun retrieve(id: String?): UserB? {
+    fun retrieve(id: String?): UserB? {
         return userBDAO.retrieve(UserB(id))
     }
 
-    @Throws(Exception::class)
-    override fun retrieveByEmail(email: String?): UserB? {
-        var user: UserB? = null
-        val params: MutableMap<String, Any?> = HashMap()
-        params["email"] = email
-        user = userBDAO.retrieve(params)
-        return user
+    fun retrieveByEmail(email: String): UserB? {
+        return userBDAO.retrieve(userBDAO.createBuilder()
+            .appendParamQuery("email", email)
+            .build())
     }
 
-    @Throws(Exception::class)
-    override fun retrieveByPhone(phoneNumber: Long?): UserB? {
+    fun retrieveByPhone(phoneNumber: Long): UserB? {
         return userBDAO.retrieve(
             userBDAO.createBuilder()
-                .appendParamQuery("phoneNumber", phoneNumber)
-                .build()
+            .appendParamQuery("phoneNumber", phoneNumber)
+            .build()
         )
     }
 
-    @Throws(Exception::class)
-    override fun retrieveByEmailDetach(email: String?): UserB? {
-        //nesta versao nao temos jpa, entao nao sera necessario efetuar o detach
-        return retrieveByEmail(email)
-    }
-
-    @Throws(Exception::class)
-    override fun retrieveByToken(token: String?): UserB? {
-        var user: UserB? = null
-        val params: MutableMap<String, Any?> = HashMap()
-        params["token"] = token
-        user = userBDAO.retrieve(params)
-        if (user != null && user.idRole != null) {
-            val role: BackofficeRole = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
-            user.setRole(role)
+    fun retrieveByToken(token: String): UserB? {
+        val user = userBDAO.retrieve(userBDAO.createBuilder()
+            .appendParamQuery("token", token)
+            .build())
+        if (user?.idRole != null) {
+            val role = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
+            user.role = role
         }
         return user
     }
 
-    @Throws(Exception::class)
-    override fun retrieveRole(id: String?): BackofficeRole? {
+    fun retrieveRole(id: String?): BackofficeRole? {
         return backofficeRoleDAO.retrieve(BackofficeRole(id))
     }
 
-    @Throws(Exception::class)
-    override fun userCard(idUser: String?): UserBCard? {
-        var userCard: UserBCard? = null
+    fun userCard(idUser: String?): UserBCard? {
+        var userCard: UserBCard?
         val user = retrieve(idUser)
         userCard = userCard(user)
         return userCard
     }
 
-    @Throws(Exception::class)
-    override fun userCard(user: UserB?): UserBCard? {
-        var userCard: UserBCard? = null
+    fun userCard(user: UserB?): UserBCard? {
+        var userCard: UserBCard?
         userCard = UserBCard()
         userCard.id = user!!.id
         userCard.name = user.name
         return userCard
     }
 
-    @Throws(Exception::class)
-    override fun listAdminUsers(): List<UserB?>? {
-        var list: List<UserB?>? = null
-        val params: MutableMap<String, Any> = HashMap()
-        params["role.fgAdmin"] = true
-        list = userBDAO.search(params)
-        return list
+    fun listAdminUsers(): List<UserB?>? {
+        return userBDAO.search(userBDAO.createBuilder()
+            .appendParamQuery("role.fgAdmin", true)
+            .build())
     }
 
-    @Throws(Exception::class)
-    override fun listUsersByRole(roleId: String?): List<UserB?>? {
-        var list: List<UserB?>? = null
-        val params: MutableMap<String, Any?> = HashMap()
-        params["role.id"] = roleId
-        list = userBDAO.search(params)
-        return list
+    fun listUsersByRole(roleId: String): List<UserB?>? {
+        return userBDAO.search(userBDAO.createBuilder()
+            .appendParamQuery("role.id", roleId)
+            .build())
     }
 
-    @Deprecated("")
-    @Throws(Exception::class)
-    override fun changeStatus(idUserB: String?) {
-        val userB = retrieve(idUserB)
-        if (userB!!.status == UserBStatusEnum.ACTIVE) {
-            userB.status = UserBStatusEnum.BLOCKED
-        } else {
-            userB.status = UserBStatusEnum.ACTIVE
-        }
-        userBDAO.update(userB)
+    fun listAdminRoles(): List<BackofficeRole?>? {
+        return backofficeRoleDAO.search(backofficeRoleDAO.createBuilder()
+            .appendParamQuery("fgAdmin", true)
+            .build())
     }
 
-    @Throws(Exception::class)
-    override fun createFirstAdminUser() {
-        var userB = retrieveByEmail("admin@mangobits.com")
-        if (userB == null) {
-            userB = UserB()
-            userB.email = "admin@mangobits.com"
-            userB.name = "Admin MangoBits"
-            userB.password = "admin"
-            userB.setRole(retrieveRole("admin"))
-            saveUser(userB)
-        }
+    fun listOperationalRoles(): List<BackofficeRole?>? {
+        return backofficeRoleDAO.search(backofficeRoleDAO.createBuilder()
+            .appendParamQuery("fgAdmin", false)
+            .build())
     }
 
-    @Throws(Exception::class)
-    override fun listAdminRoles(): List<BackofficeRole?>? {
-        var list: List<BackofficeRole?>? = null
-        val params: MutableMap<String, Any> = HashMap()
-        params["fgAdmin"] = true
-        list = backofficeRoleDAO.search(params)
-        return list
-    }
-
-    @Throws(Exception::class)
-    override fun listOperationalRoles(): List<BackofficeRole?>? {
-        var list: List<BackofficeRole?>? = null
-        val params: MutableMap<String, Any> = HashMap()
-        params["fgAdmin"] = false
-        list = backofficeRoleDAO.search(params)
-        return list
-    }
-
-    override fun listAllRoles(): List<BackofficeRole?>? {
+    fun listAllRoles(): List<BackofficeRole?>? {
         return backofficeRoleDAO.listAll()
     }
 
-    @Throws(Exception::class)
-    override fun forgotPassword(email: String?) {
+    fun forgotPassword(email: String) {
         val user = retrieveByEmail(email) ?: throw BusinessException("user_not_found")
-        val key: UserAuthKey = userAuthKeyService.createKey(user.id, UserAuthKeyTypeEnum.EMAIL)
-        var language = user.language
-        if (language == null) {
-            language = "pt_BR"
-            user.language = language
+        val key: UserAuthKey = userAuthKeyService.createKey(user.id!!, UserAuthKeyTypeEnum.EMAIL)
+        if (user.language == null) {
+            user.language = "pt"
+            updateUser(user)
         }
-        val projectName: String = configurationService.loadByCode("PROJECT_NAME").getValue()
-        val title: String = MessageUtils.message(
-            LanguageEnum.localeByLanguage(language),
-            "user.confirm.email.forgot.title",
-            projectName
-        )
-        val templateId: Int = configurationService.loadByCode("USER_BACKOFFICE_EMAIL_FORGET_ID").getValueAsInt()
-        val msg = "mudar"
-        val projectLogo: String = configurationService.loadByCode("PROJECT_LOGO_URL").getValue()
+
+        val templateId = configurationService.loadByCode("PT_USER_BACKOFFICE_EMAIL_FORGET_ID")?.value?.toInt()
         val baseLink = "__BASE__/email_forgot_password_userb?l=__LANGUAGE__&k=__KEY__&u=__USER__&t=__TYPE__"
         val link: String = baseLink
-            .replace("__BASE__".toRegex(), configurationService.loadByCode("PROJECT_URL").getValue())
+            .replace("__BASE__".toRegex(), configurationService.loadByCode("PROJECT_URL")?.value!!)
             .replace("__LANGUAGE__".toRegex(), user.language!!.substring(1))
-            .replace("__KEY__".toRegex(), key.getKey())
-            .replace("__USER__".toRegex(), user.id)
-            .replace("__TYPE__".toRegex(), key.getType().toString())
+            .replace("__KEY__".toRegex(), key.key!!)
+            .replace("__USER__".toRegex(), user.id!!)
+            .replace("__TYPE__".toRegex(), key.type.toString())
+
         notificationService.sendNotification(
             NotificationBuilder()
                 .setTo(user)
                 .setTypeSending(TypeSendingNotificationEnum.EMAIL)
-                .setTitle(title)
                 .setFgAlertOnly(true)
-                .setEmailDataTemplate(object : EmailDataTemplate() {
-                    val data: Map<String, Any?>
+                .setEmailDataTemplate(object : EmailDataTemplate {
+                    override val data: Map<String?, Any?>
                         get() {
-                            val params: MutableMap<String, Any?> = HashMap()
+                            val params: MutableMap<String?, Any?> = HashMap()
                             params["user_name"] = user.name
-                            params["msg"] = msg
                             params["confirmation_link"] = link
-                            params["project_name"] = projectName
-                            params["project_logo"] = projectLogo
                             return params
                         }
+                    override val templateId: Int?
+                        get() = templateId
                 })
                 .build()
+
+
         )
     }
 
-    @Throws(Exception::class)
-    override fun validateKey(key: UserAuthKey?): Boolean? {
-        var validate = false
-        validate = userAuthKeyService.validateKey(key)
+    fun validateKey(key: UserAuthKey): Boolean {
+        val validate: Boolean = userAuthKeyService.validateKey(key)
         if (validate) {
-            val user: UserB = userBDAO.retrieve(UserB(key.getIdUser()))
+            val user = userBDAO.retrieve(UserB(key.idUser))!!
             user.userConfirmed = true
-            if (key.getType().equals(UserAuthKeyTypeEnum.EMAIL)) {
+            if (key.type!! == UserAuthKeyTypeEnum.EMAIL) {
                 user.emailConfirmed = true
             } else {
                 user.phoneConfirmed = true
@@ -486,58 +393,40 @@ class UserBService {
         return validate
     }
 
-    @Throws(Exception::class)
-    override fun retrieveByOfficeRole(idOffice: String?, idBackofficeRole: String?): UserB? {
+    fun retrieveByOfficeRole(idOffice: String, idBackofficeRole: String): UserB? {
         var user: UserB? = null
-        val listUserB = userBDAO!!.listByOfficeRole(idOffice, idBackofficeRole)
-        if (CollectionUtils.isNotEmpty(listUserB)) {
+        val listUserB = userBDAO.listByOfficeRole(idOffice, idBackofficeRole)
+        if (!listUserB.isNullOrEmpty()) {
             user = listUserB[0]
         }
         return user
     }
 
-    @Throws(Exception::class)
-    override fun listByOfficeRole(idOffice: String?, idBackofficeRole: String?): List<UserB?>? {
-        return userBDAO!!.listByOfficeRole(idOffice, idBackofficeRole)
+    fun listByOfficeRole(idOffice: String, idBackofficeRole: String): List<UserB?>? {
+        return userBDAO.listByOfficeRole(idOffice, idBackofficeRole)
     }
 
-    @Throws(Exception::class)
-    override fun listByOfficeRoleDepartment(
-        idOffice: String?,
-        idBackofficeRole: String?,
-        idDepartment: String?
+    fun listByOfficeRoleDepartment(
+        idOffice: String,
+        idBackofficeRole: String,
+        idDepartment: String
     ): List<UserB?>? {
-        return userBDAO!!.listByOfficeRoleDepartment(idOffice, idBackofficeRole, idDepartment)
+        return userBDAO.listByOfficeRoleDepartment(idOffice, idBackofficeRole, idDepartment)
     }
 
-    @Throws(Exception::class)
-    override fun retrieveByOfficeRoleDepartment(
-        idOffice: String?,
-        idBackofficeRole: String?,
-        idDepartment: String?
+    fun retrieveByOfficeRoleDepartment(
+        idOffice: String,
+        idBackofficeRole: String,
+        idDepartment: String
     ): UserB? {
         var user: UserB? = null
-        val listUserB = userBDAO!!.listByOfficeRoleDepartment(idOffice, idBackofficeRole, idDepartment)
-        if (CollectionUtils.isNotEmpty(listUserB)) {
+        val listUserB = userBDAO.listByOfficeRoleDepartment(idOffice, idBackofficeRole, idDepartment)
+        if (!listUserB.isNullOrEmpty()) {
             user = listUserB[0]
         }
         return user
     }
 
-    @Throws(Exception::class)
-    override fun pathFiles(idUser: String?): String? {
-        return configurationService.loadByCode(ConfigurationEnum.PATH_BASE).getValue() + "/userb/" + idUser
-    }
-
-    @Throws(Exception::class)
-    override fun sendNotificationAppByBackofficeRole(backofficeRoleEnum: BackofficeRoleEnum?, message: String?) {
-        val listUserB = listUsersByRole(backofficeRoleEnum.getId())
-        if (CollectionUtils.isNotEmpty(listUserB)) {
-            for (userB in listUserB!!) {
-                sendNotification(userB, message)
-            }
-        }
-    }
 
     @Throws(Exception::class)
     fun sendNotification(userB: UserB?, message: String?) {
@@ -550,23 +439,22 @@ class UserBService {
         )
     }
 
-    @Throws(Exception::class)
-    override fun searchAdmin(userSearch: UserBSearch?): UserBResultSearch? {
+    fun searchAdmin(userSearch: UserBSearch?): UserBResultSearch? {
         return if (userSearch!!.page == null) {
             throw BusinessException("missing_page")
         } else {
             val sb: SearchBuilder = userBDAO.createBuilder()
             if (userSearch.status != null) {
-                sb.appendParamQuery("status", userSearch.status)
+                sb.appendParamQuery("status", userSearch.status!!)
             }
             if (userSearch.idObj != null) {
-                sb.appendParamQuery("idObj", userSearch.idObj)
+                sb.appendParamQuery("idObj", userSearch.idObj!!)
             }
-            if (userSearch.queryString != null && !userSearch.queryString!!.isEmpty()) {
-                sb.appendParamQuery("name|nameObj", userSearch.queryString, OperationEnum.OR_FIELDS)
+            if (userSearch.queryString != null && userSearch.queryString!!.isNotEmpty()) {
+                sb.appendParamQuery("name|nameObj", userSearch.queryString!!, OperationEnum.OR_FIELDS)
             }
             if (userSearch.type != null) {
-                sb.appendParamQuery("type", userSearch.type)
+                sb.appendParamQuery("type", userSearch.type!!)
             }
             if (userSearch.pageItensNumber != null && userSearch.pageItensNumber!! > 0) {
                 sb.setFirst(userSearch.pageItensNumber!! * (userSearch.page!! - 1))
@@ -576,10 +464,9 @@ class UserBService {
                 sb.setMaxResults(10)
             }
             sb.appendSort("name", 1)
-            val list: List<UserB> = userBDAO.search(sb.build())
+            val list = userBDAO.search(sb.build())
             val totalAmount = totalAmount(sb)
-            val pageQuantity: Long
-            pageQuantity = if (userSearch.pageItensNumber != null && userSearch.pageItensNumber!! > 0) {
+            val pageQuantity: Long = if (userSearch.pageItensNumber != null && userSearch.pageItensNumber!! > 0) {
                 pageQuantity(userSearch.pageItensNumber!!, totalAmount)
             } else {
                 pageQuantity(10, totalAmount)
@@ -592,9 +479,8 @@ class UserBService {
         }
     }
 
-    @Throws(Exception::class)
-    override fun saveBackofficeRole(backofficeRole: BackofficeRole?) {
-        if (backofficeRole.getId() == null) {
+    fun saveBackofficeRole(backofficeRole: BackofficeRole) {
+        if (backofficeRole.id == null) {
             backofficeRoleDAO.insert(backofficeRole)
         } else {
             backofficeRoleDAO.update(backofficeRole)
@@ -615,23 +501,22 @@ class UserBService {
         return pageQuantity
     }
 
-    override fun search(userBSearch: UserBSearch?): List<UserB?>? {
-        val searchBuilder: SearchBuilder = userBDAO.createBuilder()
-        if (userBSearch!!.roleID != null) {
-            searchBuilder.appendParamQuery("role._id", userBSearch.roleID)
+    fun search(userBSearch: UserBSearch): List<UserB?>? {
+        val searchBuilder = userBDAO.createBuilder()
+        if (userBSearch.roleID != null) {
+            searchBuilder.appendParamQuery("role._id", userBSearch.roleID!!)
         }
         if (userBSearch.userBName != null) {
-            searchBuilder.appendParamQuery("name", userBSearch.userBName, OperationEnum.LIKE)
+            searchBuilder.appendParamQuery("name", userBSearch.userBName!!, OperationEnum.LIKE)
         }
         if (userBSearch.userBDocument != null) {
-            searchBuilder.appendParamQuery("document", userBSearch.userBDocument)
+            searchBuilder.appendParamQuery("document", userBSearch.userBDocument!!)
         }
         if (userBSearch.queryString != null) {
-            searchBuilder.appendParamQuery("name|document", userBSearch.queryString, OperationEnum.OR_FIELDS_LIKE)
+            searchBuilder.appendParamQuery("name|document", userBSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
         }
-        val userBList: List<UserB> = userBDAO.search(searchBuilder.build())
         val returnList = ArrayList<UserB?>()
-        for (userB in userBList) {
+        userBDAO.search(searchBuilder.build())?.forEach { userB ->
             val newUserB = UserB()
             newUserB.id = userB.id
             newUserB.name = userB.name
@@ -643,40 +528,25 @@ class UserBService {
         return returnList
     }
 
-    override fun searchResponse(userBSearch: UserBSearch?): ResponseList<UserB> {
+    fun searchResponse(userBSearch: UserBSearch): ResponseList<UserB>? {
         val searchBuilder: SearchBuilder = userBDAO.createBuilder()
-        if (userBSearch!!.roleID != null) {
-            searchBuilder.appendParamQuery("role._id", userBSearch.roleID)
+        if (userBSearch.roleID != null) {
+            searchBuilder.appendParamQuery("role._id", userBSearch.roleID!!)
         }
         if (userBSearch.userBName != null) {
-            searchBuilder.appendParamQuery("name", userBSearch.userBName, OperationEnum.LIKE)
+            searchBuilder.appendParamQuery("name", userBSearch.userBName!!, OperationEnum.LIKE)
         }
         if (userBSearch.userBDocument != null) {
-            searchBuilder.appendParamQuery("document", userBSearch.userBDocument)
+            searchBuilder.appendParamQuery("document", userBSearch.userBDocument!!)
         }
         if (userBSearch.queryString != null) {
-            searchBuilder.appendParamQuery("name|document", userBSearch.queryString, OperationEnum.OR_FIELDS_LIKE)
+            searchBuilder.appendParamQuery("name|document", userBSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
         }
         if (userBSearch.page == null) {
             userBSearch.page = 1
         }
         searchBuilder.setFirst(QUANTITY_PAGE * (userBSearch.page!! - 1))
         searchBuilder.setMaxResults(QUANTITY_PAGE)
-        val userBList: ResponseList<UserB> = userBDAO.searchToResponse(searchBuilder.build())
-        val returnList: ResponseList<UserB> = ResponseList()
-        val returnUserBList = ArrayList<UserB>()
-        for (userB in userBList.getList()) {
-            val newUserB = UserB()
-            newUserB.id = userB.id
-            newUserB.name = userB.name
-            newUserB.lastName = userB.lastName
-            newUserB.document = userB.document
-            newUserB.status = userB.status
-            returnUserBList.add(newUserB)
-        }
-        returnList.setList(returnUserBList)
-        returnList.setPageQuantity(userBList.getPageQuantity())
-        returnList.setTotalAmount(userBList.getTotalAmount())
-        return returnList
+        return userBDAO.searchToResponse(searchBuilder.build())
     }
 }

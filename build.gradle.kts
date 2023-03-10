@@ -27,7 +27,7 @@ dependencies {
     implementation("com.orangebox.kit.core:orangekit-core:0.0.10")
 
     implementation("com.orangebox.kit.core:orangekit-core:1.0.4")
-    implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.0")
+    implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")
     implementation("com.orangebox.kit.notification:orangekit-notification:1.0.0")
 
     testImplementation("io.quarkus:quarkus-junit5")

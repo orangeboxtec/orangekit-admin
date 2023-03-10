@@ -2,6 +2,7 @@ package com.orangebox.kit.admin.util
 
 import com.orangebox.kit.admin.userb.UserB
 import com.orangebox.kit.admin.userb.UserBService
+import java.net.http.HttpRequest
 import javax.inject.Inject
 import javax.ws.rs.NotAuthorizedException
 import javax.ws.rs.core.Context
@@ -10,17 +11,16 @@ import javax.ws.rs.core.HttpHeaders
 open class AdminBaseRestService {
 
     @Context
-    private val request: HttpServletRequest? = null
+    private lateinit var request: HttpRequest
 
     @Inject
     private lateinit var userBService: UserBService
 
-    @get:Throws(Exception::class)
     protected val userTokenSession: UserB?
-        protected get() {
+        get() {
 
             // Get the HTTP Authorization header from the request
-            val authorizationHeader: String = request.getHeader(HttpHeaders.AUTHORIZATION)
+            val authorizationHeader = request.headers().allValues(HttpHeaders.AUTHORIZATION)[0]
 
             // Check if the HTTP Authorization header is present and formatted correctly 
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {

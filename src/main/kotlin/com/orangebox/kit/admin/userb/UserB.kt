@@ -4,19 +4,26 @@ import com.orangebox.kit.admin.role.BackofficeRole
 import com.orangebox.kit.core.address.AddressInfo
 import com.orangebox.kit.core.annotation.OKEntity
 import com.orangebox.kit.core.annotation.OKId
+import com.orangebox.kit.core.user.GeneralUser
 import java.util.*
 
 @OKEntity(name = "userB")
-class UserB {
+class UserB: GeneralUser {
 
 	@OKId
-    var id: String? = null
+	override var id: String? = null
+
+	override var phoneNumber: Long? = null
+
+	override var phoneCountryCode: Int? = null
+
+	override var email: String? = null
+
+	override var tokenFirebase: String? = null
 
 	var idObj: String? = null
 
     var idRole: String? = null
-
-	var email: String? = null
 
 	var name: String? = null
 
@@ -37,14 +44,6 @@ class UserB {
 	var token: String? = null
 
     var type: String? = null
-
-	var keyIOS: String? = null
-
-	var keyAndroid: String? = null
-
-	var phoneNumber: Long? = null
-
-	var phoneCountryCode: Int? = null
 
     var tokenExpirationDate: Date? = null
 

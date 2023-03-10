@@ -5,8 +5,8 @@ import javax.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 class UserBDAO : AbstractDAO<UserB>(UserB::class.java) {
-    override fun getId(user: UserB): Any? {
-        return user.id
+    override fun getId(bean: UserB): Any? {
+        return bean.id
     }
 
     fun listByInfo(infoKey: String, infoValue: String): List<UserB>? {
