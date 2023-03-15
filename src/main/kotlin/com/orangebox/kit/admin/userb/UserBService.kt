@@ -16,6 +16,8 @@ import com.orangebox.kit.notification.NotificationBuilder
 import com.orangebox.kit.notification.NotificationService
 import com.orangebox.kit.notification.TypeSendingNotificationEnum
 import com.orangebox.kit.notification.email.data.EmailDataTemplate
+import org.eclipse.microprofile.config.inject.ConfigProperty
+import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -43,6 +45,12 @@ class UserBService {
 
     @Inject
     protected lateinit var tokenValidatorProvider: TokenValidatorProvider
+
+    @ConfigProperty(name = "orangekit.admin.forgotemail.templateid", defaultValue = "ERROR")
+    private lateinit var forgotEmailTemplateId: String
+
+    @ConfigProperty(name = "orangekit.core.projecturl", defaultValue = "http://localhost:4200")
+    private lateinit var projectUrl: String
 
     private val QUANTITY_PAGE = 12
     @PostConstruct
@@ -154,13 +162,13 @@ class UserBService {
             user.language = "pt_BR"
         }
 
-        val templateId = configurationService.loadByCode("PT_USER_BACKOFFICE_EMAIL_CONFIRM_ID")
-        if (templateId != null && user.password == null) {
-            val link: String? = configurationService.loadByCode("USER_BACKOFFICE_EMAIL_CONFIRM_LINK")?.value
-                ?.replace("__LANGUAGE__", user.language!!.substring(1))
-                ?.replace("__KEY__", key.key!!)
-                ?.replace("__USER__", user.id!!)
-                ?.replace("__TYPE__", key.type.toString())
+        if (user.password == null) {
+            val language = user.language!!.substring(1)
+            val link = "$projectUrl/pages/email_forgot_password_userb?l=$language&k=${key.key!!}&u=${user.id!!}&t=${key.type}"
+
+            if(forgotEmailTemplateId == "ERROR"){
+                throw IllegalArgumentException("orangekit.admin.forgotemail.templateid must be provided in .env")
+            }
 
             notificationService.sendNotification(
                 NotificationBuilder()
@@ -175,13 +183,13 @@ class UserBService {
                                 params["confirmation_link"] = link
                                 return params
                             }
-                        override val templateId: Int?
-                            get() = templateId.value?.toInt()
+                        override val templateId: Int
+                            get() = forgotEmailTemplateId.toInt()
                     })
                     .build()
             )
         }
-        return userDB
+        return user
     }
 
     fun updateUser(user: UserB) {
