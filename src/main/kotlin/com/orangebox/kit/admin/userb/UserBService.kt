@@ -475,7 +475,7 @@ class UserBService {
                 sb.appendParamQuery("idObj", userSearch.idObj!!)
             }
             if (userSearch.queryString != null && userSearch.queryString!!.isNotEmpty()) {
-                sb.appendParamQuery("name|nameObj", userSearch.queryString!!, OperationEnum.OR_FIELDS)
+                sb.appendParamQuery("name|nameObj|lastName|document", userSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
             }
             if (userSearch.type != null) {
                 sb.appendParamQuery("type", userSearch.type!!)
@@ -536,8 +536,8 @@ class UserBService {
         if (userBSearch.userBDocument != null) {
             searchBuilder.appendParamQuery("document", userBSearch.userBDocument!!)
         }
-        if (userBSearch.queryString != null) {
-            searchBuilder.appendParamQuery("name|document", userBSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
+        if (userBSearch.queryString != null && userBSearch.queryString!!.isNotEmpty()) {
+            searchBuilder.appendParamQuery("name|nameObj|lastName|document", userBSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
         }
         val returnList = ArrayList<UserB?>()
         userBDAO.search(searchBuilder.build())?.forEach { userB ->
@@ -563,8 +563,8 @@ class UserBService {
         if (userBSearch.userBDocument != null) {
             searchBuilder.appendParamQuery("document", userBSearch.userBDocument!!)
         }
-        if (userBSearch.queryString != null) {
-            searchBuilder.appendParamQuery("name|document", userBSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
+        if (userBSearch.queryString != null && userBSearch.queryString!!.isNotEmpty()) {
+            searchBuilder.appendParamQuery("name|nameObj|lastName|document", userBSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
         }
         if (userBSearch.page == null) {
             userBSearch.page = 1
