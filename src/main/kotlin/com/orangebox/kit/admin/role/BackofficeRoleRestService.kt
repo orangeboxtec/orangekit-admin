@@ -2,6 +2,7 @@ package com.orangebox.kit.admin.role
 
 import com.orangebox.kit.admin.userb.UserBService
 import com.orangebox.kit.admin.util.AdminBaseRestService
+import com.orangebox.kit.admin.util.SecuredAdmin
 import javax.inject.Inject
 import javax.ws.rs.Consumes
 import javax.ws.rs.POST
@@ -15,6 +16,7 @@ class BackofficeRoleRestService : AdminBaseRestService() {
     @Inject
     private lateinit var userBService: UserBService
 
+    @SecuredAdmin
     @POST
     @Path("/save")
     @Consumes(MediaType.APPLICATION_JSON)

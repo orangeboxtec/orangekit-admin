@@ -31,6 +31,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.authenticate(user)
     }
 
+    @SecuredAdmin
     @GET
     @Path("/load/{idUserB}")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -72,6 +73,7 @@ class UserBRestService : AdminBaseRestService() {
         return userB
     }
 
+
     @GET
     @SecuredAdmin
     @Path("/listAllRoles")
@@ -80,6 +82,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.listAllRoles()
     }
 
+    @SecuredAdmin
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -124,6 +127,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.searchAdmin(userSearch)
     }
 
+    @SecuredAdmin
     @POST
     @Consumes("application/json")
     @Produces("application/json;charset=utf-8")
@@ -132,6 +136,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.search(userBSearch)
     }
 
+    @SecuredAdmin
     @POST
     @Consumes("application/json")
     @Produces("application/json;charset=utf-8")
