@@ -45,7 +45,10 @@ class UserBService {
     @Inject
     protected lateinit var tokenValidatorProvider: TokenValidatorProvider
 
-    @ConfigProperty(name = "orangekit.admin.forgotemail.templateid", defaultValue = "ERROR")
+    @ConfigProperty(name = "orangekit.admin.email.welcome.templateid", defaultValue = "ERROR")
+    private lateinit var welcomeEmailTemplateId: String
+
+    @ConfigProperty(name = "orangekit.admin.email.forgotpassword.templateid", defaultValue = "ERROR")
     private lateinit var forgotEmailTemplateId: String
 
     @ConfigProperty(name = "orangekit.core.projecturl", defaultValue = "http://localhost:4200")
@@ -169,8 +172,8 @@ class UserBService {
             val language = user.language!!.substring(1)
             val link = "$projectUrl/pages/email_forgot_password_userb?l=$language&k=${key.key!!}&u=${user.id!!}&t=${key.type}"
 
-            if(forgotEmailTemplateId == "ERROR"){
-                throw IllegalArgumentException("orangekit.admin.forgotemail.templateid must be provided in .env")
+            if(welcomeEmailTemplateId == "ERROR"){
+                throw IllegalArgumentException("orangekit.admin.email.welcome.templateid must be provided in .env")
             }
 
             notificationService.sendNotification(
@@ -187,7 +190,7 @@ class UserBService {
                                 return params
                             }
                         override val templateId: Int
-                            get() = forgotEmailTemplateId.toInt()
+                            get() = welcomeEmailTemplateId.toInt()
                     })
                     .build()
             )
@@ -369,16 +372,10 @@ class UserBService {
             user.language = "pt"
             updateUser(user)
         }
-
-        val templateId = configurationService.loadByCode("PT_USER_BACKOFFICE_EMAIL_FORGET_ID")?.value?.toInt()
-        val baseLink = "__BASE__/email_forgot_password_userb?l=__LANGUAGE__&k=__KEY__&u=__USER__&t=__TYPE__"
-        val link: String = baseLink
-            .replace("__BASE__".toRegex(), configurationService.loadByCode("PROJECT_URL")?.value!!)
-            .replace("__LANGUAGE__".toRegex(), user.language!!.substring(1))
-            .replace("__KEY__".toRegex(), key.key!!)
-            .replace("__USER__".toRegex(), user.id!!)
-            .replace("__TYPE__".toRegex(), key.type.toString())
-
+        val link = "$projectUrl/pages/email_forgot_password_userb?l=${user.language}&k=${key.key}&u=${user.id}&t=${key.type}"
+        if(forgotEmailTemplateId == "ERROR"){
+            throw IllegalArgumentException("orangekit.admin.email.forgotpassword.templateid must be provided in .env")
+        }
         notificationService.sendNotification(
             NotificationBuilder()
                 .setTo(user)
@@ -392,8 +389,8 @@ class UserBService {
                             params["confirmation_link"] = link
                             return params
                         }
-                    override val templateId: Int?
-                        get() = templateId
+                    override val templateId: Int
+                        get() = forgotEmailTemplateId.toInt()
                 })
                 .build()
 
