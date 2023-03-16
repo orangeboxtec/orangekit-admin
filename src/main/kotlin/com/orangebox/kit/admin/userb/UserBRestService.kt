@@ -5,9 +5,7 @@ import com.orangebox.kit.admin.role.Role
 import com.orangebox.kit.admin.util.AdminBaseRestService
 import com.orangebox.kit.admin.util.SecuredAdmin
 import com.orangebox.kit.authkey.UserAuthKey
-import com.orangebox.kit.core.configuration.ConfigurationService
 import com.orangebox.kit.core.dto.ResponseList
-import com.orangebox.kit.notification.email.EmailService
 import java.io.*
 import java.net.http.HttpRequest
 import javax.inject.Inject
@@ -24,11 +22,6 @@ class UserBRestService : AdminBaseRestService() {
     @Context
     private val requestB: HttpRequest? = null
 
-    @Inject
-    private lateinit var configurationService: ConfigurationService
-
-    @Inject
-    private lateinit var emailService: EmailService
 
     @POST
     @Path("/authenticate")
@@ -36,14 +29,6 @@ class UserBRestService : AdminBaseRestService() {
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     fun authenticate(user: UserB): LoginInfo? {
         return userBService.authenticate(user)
-    }
-
-    @POST
-    @Path("/authenticateMobile")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    fun authenticateMobile(user: UserB): UserB? {
-        return userBService.authenticateMobile(user)
     }
 
     @GET
@@ -87,7 +72,6 @@ class UserBRestService : AdminBaseRestService() {
         return userB
     }
 
-
     @GET
     @SecuredAdmin
     @Path("/listAllRoles")
@@ -95,7 +79,6 @@ class UserBRestService : AdminBaseRestService() {
     fun listAllRoles(): List<BackofficeRole?>? {
         return userBService.listAllRoles()
     }
-
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -105,15 +88,22 @@ class UserBRestService : AdminBaseRestService() {
         userBService.updatePassword(usMon)
     }
 
+    @SecuredAdmin
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Path("/updatePasswordForgot")
+    fun updatePasswordForgot(usMon: UserB) {
+        userBService.updatePasswordForgot(usMon)
+    }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Path("/validateKey")
-    fun validateKey(userAuthKey: UserAuthKey): Boolean {
+    fun validateKey(userAuthKey: UserAuthKey): UserB? {
         return userBService.validateKey(userAuthKey)
     }
-
 
     @PUT
     @Path("/forgotPassword/{email}")

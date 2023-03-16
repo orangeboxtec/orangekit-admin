@@ -17,7 +17,6 @@ import com.orangebox.kit.notification.NotificationService
 import com.orangebox.kit.notification.TypeSendingNotificationEnum
 import com.orangebox.kit.notification.email.data.EmailDataTemplate
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import java.lang.IllegalArgumentException
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -69,19 +68,23 @@ class UserBService {
         if (userDB.password != passHash) {
             throw BusinessException("invalid_password")
         }
-        userDB.token = UUID.randomUUID().toString()
-        val expCal = Calendar.getInstance()
-        expCal.add(Calendar.HOUR, 12)
-        userDB.tokenExpirationDate = expCal.time
-        userBDAO.update(userDB)
-        if (userDB.idRole != null) {
-            val role = backofficeRoleDAO.retrieve(BackofficeRole(userDB.idRole))
-            userDB.role = role
-        }
-        return if (userDB.status != UserBStatusEnum.BLOCKED) {
+        generateSession(userDB)
+        return if (user.status != UserBStatusEnum.BLOCKED) {
             userDB
         } else {
             throw BusinessException("user_blocked")
+        }
+    }
+
+    fun generateSession(user: UserB){
+        user.token = UUID.randomUUID().toString()
+        val expCal = Calendar.getInstance()
+        expCal.add(Calendar.HOUR, 12)
+        user.tokenExpirationDate = expCal.time
+        userBDAO.update(user)
+        if (user.idRole != null) {
+            val role = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
+            user.role = role
         }
     }
 
@@ -266,6 +269,15 @@ class UserBService {
         userBDAO.update(userBase)
     }
 
+    fun updatePasswordForgot(user: UserB) {
+        val userBase = userBDAO.retrieve(user)
+        if (userBase != null) {
+            userBase.salt = SecUtils.salt
+            userBase.password = SecUtils.generateHash(userBase.salt, user.password!!)
+            userBDAO.update(userBase)
+        }
+    }
+
     fun saveUser(user: UserB?) {
         if (user!!.id == null) {
             createNewUser(user)
@@ -389,7 +401,7 @@ class UserBService {
         )
     }
 
-    fun validateKey(key: UserAuthKey): Boolean {
+    fun validateKey(key: UserAuthKey): UserB? {
         val validate: Boolean = userAuthKeyService.validateKey(key)
         if (validate) {
             val user = userBDAO.retrieve(UserB(key.idUser))!!
@@ -399,9 +411,15 @@ class UserBService {
             } else {
                 user.phoneConfirmed = true
             }
+
+            generateSession(user)
+
             userBDAO.update(user)
+
+            return user
         }
-        return validate
+
+        throw BusinessException("invalid_key")
     }
 
     fun retrieveByOfficeRole(idOffice: String, idBackofficeRole: String): UserB? {
@@ -438,8 +456,6 @@ class UserBService {
         return user
     }
 
-
-    @Throws(Exception::class)
     fun sendNotification(userB: UserB?, message: String?) {
         notificationService.sendNotification(
             NotificationBuilder()

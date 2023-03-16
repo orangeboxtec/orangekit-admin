@@ -25,10 +25,10 @@ class AuthenticationFilter : ContainerRequestFilter {
     override fun filter(requestContext: ContainerRequestContext) {
 
         // Get the HTTP Authorization header from the request
-        val authorizationHeader: String = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION)
+        val authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION)
 
         // Check if the HTTP Authorization header is present and formatted correctly 
-        if (!authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             throw NotAuthorizedException("Authorization header must be provided")
         }
 

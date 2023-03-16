@@ -27,7 +27,7 @@ dependencies {
 
     implementation("com.orangebox.kit.core:orangekit-core:1.0.6")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")
-    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.2")
+    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.3")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")

@@ -1,7 +1,7 @@
 package com.orangebox.kit.admin.util
 
 import com.orangebox.kit.admin.userb.UserBTokenValidatorService
-import java.util.*
+import org.eclipse.microprofile.config.inject.ConfigProperty
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
@@ -15,11 +15,12 @@ class TokenValidatorProvider {
     @Inject
     private lateinit var userBTokenValidatorService: UserBTokenValidatorService
 
+    @ConfigProperty(name = "orangekit.admin.tokenValidator", defaultValue = "ERROR")
+    private lateinit var validator: String
+
     @PostConstruct
     fun init() {
         try {
-            val bundle = ResourceBundle.getBundle("db")
-            val validator = bundle.getString("tokenValidator")
             tokenValidator = run {
                 val ctx = InitialContext()
                 val tv = ctx.lookup(validator) as TokenValidator
@@ -27,7 +28,6 @@ class TokenValidatorProvider {
             }
         } catch (e: Exception) {
             tokenValidator = userBTokenValidatorService
-            e.printStackTrace()
         }
     }
 }
