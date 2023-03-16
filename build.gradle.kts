@@ -6,6 +6,9 @@ plugins {
     id("org.kordamp.gradle.jandex") version "1.1.0"
 }
 
+group = "com.orangebox.kit.admin"
+version = "1.0.0"
+
 repositories {
     mavenCentral()
     mavenLocal()
@@ -19,7 +22,7 @@ val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project
 
 dependencies {
-    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
+    implementation(platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.quarkus:quarkus-arc")
@@ -32,9 +35,6 @@ dependencies {
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 }
-
-group = "com.orangebox.kit.admin"
-version = "1.0.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
