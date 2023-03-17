@@ -27,8 +27,8 @@ class UserBRestService : AdminBaseRestService() {
     @Path("/authenticate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
-    fun authenticate(user: UserB): LoginInfo? {
-        return userBService.authenticate(user)
+    fun authenticate(user: UserB): UserB? {
+        return userBService.authenticateMobile(user)
     }
 
     @SecuredAdmin
