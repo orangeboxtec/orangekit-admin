@@ -65,6 +65,8 @@ class UserB: GeneralUser {
 
 	var language: String? = null
 
+	var fgAdmin: Boolean? = null
+
     constructor()
     constructor(id: String?) {
         this.id = id
