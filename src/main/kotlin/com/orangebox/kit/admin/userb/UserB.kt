@@ -65,7 +65,7 @@ class UserB: GeneralUser {
 
 	var language: String? = null
 
-	var fgAdmin: Boolean? = null
+	var urlImage: String? = null
 
     constructor()
     constructor(id: String?) {

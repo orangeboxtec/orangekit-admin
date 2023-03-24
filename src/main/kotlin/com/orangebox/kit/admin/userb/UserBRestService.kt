@@ -6,6 +6,7 @@ import com.orangebox.kit.admin.util.AdminBaseRestService
 import com.orangebox.kit.admin.util.SecuredAdmin
 import com.orangebox.kit.authkey.UserAuthKey
 import com.orangebox.kit.core.dto.ResponseList
+import com.orangebox.kit.core.photo.FileUpload
 import java.io.*
 import java.net.http.HttpRequest
 import javax.inject.Inject
@@ -143,5 +144,14 @@ class UserBRestService : AdminBaseRestService() {
     @Path("/searchResponse")
     fun searchResponse(userBSearch: UserBSearch): ResponseList<UserB>? {
         return userBService.searchResponse(userBSearch)
+    }
+
+
+    @SecuredAdmin
+    @POST
+    @Consumes("application/json")
+    @Path("/saveAvatar")
+    fun saveAvatar(fileUpload: FileUpload) {
+        return userBService.saveAvatar(fileUpload)
     }
 }

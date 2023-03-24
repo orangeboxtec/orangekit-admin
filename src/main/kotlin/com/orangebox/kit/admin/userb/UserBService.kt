@@ -6,11 +6,13 @@ import com.orangebox.kit.admin.util.TokenValidatorProvider
 import com.orangebox.kit.authkey.UserAuthKey
 import com.orangebox.kit.authkey.UserAuthKeyService
 import com.orangebox.kit.authkey.UserAuthKeyTypeEnum
+import com.orangebox.kit.core.bucket.BucketService
 import com.orangebox.kit.core.configuration.ConfigurationService
 import com.orangebox.kit.core.dao.OperationEnum
 import com.orangebox.kit.core.dao.SearchBuilder
 import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.exception.BusinessException
+import com.orangebox.kit.core.photo.FileUpload
 import com.orangebox.kit.core.utils.SecUtils
 import com.orangebox.kit.notification.NotificationBuilder
 import com.orangebox.kit.notification.NotificationService
@@ -35,6 +37,9 @@ class UserBService {
 
     @Inject
     private lateinit var notificationService: NotificationService
+
+    @Inject
+    private lateinit var bucketService: BucketService
 
     @Inject
     private lateinit var userBDAO: UserBDAO
@@ -572,5 +577,13 @@ class UserBService {
         searchBuilder.setFirst(QUANTITY_PAGE * (userBSearch.page!! - 1))
         searchBuilder.setMaxResults(QUANTITY_PAGE)
         return userBDAO.searchToResponse(searchBuilder.build())
+    }
+
+
+    fun saveAvatar(file: FileUpload){
+        val userb = retrieve(file.idObject) ?: throw BusinessException("user_not_foud")
+        val url = bucketService.saveFile(file, "userb", null, "image/jpg")
+        userb.urlImage = url
+        userBDAO.update(userb)
     }
 }
