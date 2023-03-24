@@ -251,6 +251,9 @@ class UserBService {
         if (user.phoneNumber != null) {
             userDB.phoneNumber = user.phoneNumber
         }
+        if (user.idRole != null) {
+            userDB.idRole = user.idRole
+        }
         if (user.role != null) {
             val role = backofficeRoleDAO.retrieve(user.role!!)
             userDB.role = role
