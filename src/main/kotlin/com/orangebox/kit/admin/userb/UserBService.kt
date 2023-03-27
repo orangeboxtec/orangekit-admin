@@ -592,4 +592,19 @@ class UserBService {
         userb.urlImage = url
         userBDAO.update(userb)
     }
+
+    fun autoLogin(user: UserB): UserB? {
+        val userDB = userBDAO.retrieve(UserB(user.id))
+        if (userDB == null || user.password == null) {
+            throw BusinessException("user_not_found")
+        }
+        if (userDB.password == null || user.password != userDB.password) {
+            throw BusinessException("invalid_user_password")
+        }
+        if (userDB.status != null && userDB.status == UserBStatusEnum.BLOCKED) {
+            throw BusinessException("user_blocked")
+        }
+        createToken(userDB)
+        return userDB
+    }
 }

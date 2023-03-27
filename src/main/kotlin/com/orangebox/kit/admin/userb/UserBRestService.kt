@@ -154,4 +154,12 @@ class UserBRestService : AdminBaseRestService() {
     fun saveAvatar(fileUpload: FileUpload) {
         return userBService.saveAvatar(fileUpload)
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Path("/autoLogin")
+    fun autoLogin(usMon: UserB): UserB? {
+        return userBService.autoLogin(usMon)
+    }
 }
