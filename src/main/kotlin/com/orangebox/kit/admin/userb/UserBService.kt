@@ -333,17 +333,14 @@ class UserBService {
         return backofficeRoleDAO.retrieve(BackofficeRole(id))
     }
 
-    fun userCard(idUser: String?): UserBCard? {
-        var userCard: UserBCard?
-        val user = retrieve(idUser)
-        userCard = userCard(user)
-        return userCard
+    fun userCard(idUser: String): UserBCard? {
+        val user = retrieve(idUser) ?: throw BusinessException("user_not_found")
+        return userCard(user)
     }
 
-    fun userCard(user: UserB?): UserBCard? {
-        var userCard: UserBCard?
-        userCard = UserBCard()
-        userCard.id = user!!.id
+    fun userCard(user: UserB): UserBCard {
+        val userCard = UserBCard()
+        userCard.id = user.id
         userCard.name = user.name
         return userCard
     }
