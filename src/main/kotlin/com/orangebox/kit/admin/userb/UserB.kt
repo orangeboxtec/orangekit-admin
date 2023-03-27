@@ -55,11 +55,7 @@ class UserB: GeneralUser {
 
 	var role: BackofficeRole? = null
 
-	var info: Map<String, String>? = null
-
-	var color: String? = null
-
-    var lastAddress: AddressInfo? = null
+	var info: Map<String, Any>? = null
 
     var lastLogin: Date? = null
 

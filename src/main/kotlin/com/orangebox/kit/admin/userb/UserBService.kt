@@ -224,9 +224,6 @@ class UserBService {
         if (user.userConfirmed != null) {
             userDB.userConfirmed = user.userConfirmed
         }
-        if (user.color != null) {
-            userDB.color = user.color
-        }
         if (user.creationDate != null) {
             userDB.creationDate = user.creationDate
         }
