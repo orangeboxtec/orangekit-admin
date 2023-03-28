@@ -339,6 +339,7 @@ class UserBService {
         val userCard = UserBCard()
         userCard.id = user.id
         userCard.name = user.name
+        userCard.lastName = user.lastName
         userCard.urlImage = user.urlImage
         return userCard
     }

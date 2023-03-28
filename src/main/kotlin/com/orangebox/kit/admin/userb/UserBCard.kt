@@ -6,5 +6,7 @@ class UserBCard {
 
 	var name: String? = null
 
+	var lastName: String? = null
+
 	var urlImage: String? = null
 }
