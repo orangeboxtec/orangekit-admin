@@ -59,6 +59,9 @@ class UserBService {
     @ConfigProperty(name = "orangekit.core.projecturl", defaultValue = "http://localhost:4200")
     private lateinit var projectUrl: String
 
+    @ConfigProperty(name = "orangekit.admin.ssoflow", defaultValue = "false")
+    private lateinit var ssoFlow: String
+
     private val QUANTITY_PAGE = 12
     @PostConstruct
     fun pos() {
@@ -71,6 +74,11 @@ class UserBService {
     }
 
     fun authenticateMobile(user: UserB, password: String): UserB {
+
+        if(ssoFlow.toBoolean()){
+            throw BusinessException("sso_flow_enabled")
+        }
+
         val userDB =  userBDAO.retrieve(userBDAO.createBuilder()
             .appendParamQuery("email", user.email!!)
             .appendParamQuery("status", "ACTIVE")
@@ -373,6 +381,11 @@ class UserBService {
     }
 
     fun forgotPassword(email: String) {
+
+        if(ssoFlow.toBoolean()){
+            throw BusinessException("sso_flow_enabled")
+        }
+
         val user = retrieveByEmail(email) ?: throw BusinessException("user_not_found")
         val key: UserAuthKey = userAuthKeyService.createKey(user.id!!, UserAuthKeyTypeEnum.EMAIL)
         if (user.language == null) {

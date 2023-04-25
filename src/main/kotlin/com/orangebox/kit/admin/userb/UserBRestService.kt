@@ -24,6 +24,7 @@ class UserBRestService : AdminBaseRestService() {
     private val requestB: HttpRequest? = null
 
 
+
     @POST
     @Path("/authenticate")
     @Consumes(MediaType.APPLICATION_JSON)

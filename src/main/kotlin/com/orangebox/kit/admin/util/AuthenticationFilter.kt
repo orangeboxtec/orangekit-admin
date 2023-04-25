@@ -1,7 +1,6 @@
 package com.orangebox.kit.admin.util
 
 import com.orangebox.kit.admin.userb.UserBService
-import java.io.IOException
 import javax.annotation.Priority
 import javax.inject.Inject
 import javax.ws.rs.NotAuthorizedException
@@ -21,7 +20,6 @@ class AuthenticationFilter : ContainerRequestFilter {
     @Inject
     private lateinit var userBService: UserBService
 
-    @Throws(IOException::class)
     override fun filter(requestContext: ContainerRequestContext) {
 
         // Get the HTTP Authorization header from the request
