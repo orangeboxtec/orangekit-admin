@@ -25,6 +25,10 @@ open class AdminBaseRestService {
 
             // Extract the token from the HTTP Authorization header
             val token = authorizationHeader.substring("Bearer".length).trim { it <= ' ' }
-            return userBService.retrieveByToken(token)
+            if(userBService.checkToken(token) == true){
+                return userBService.retrieveByToken(token)
+            }
+
+            throw NotAuthorizedException("invalid_token")
         }
 }

@@ -365,19 +365,16 @@ class UserBService {
     }
 
     fun retrieveByToken(token: String): UserB? {
-        if(checkToken(token) == true){
-            val user = userBDAO.retrieve(userBDAO.createBuilder()
-                .appendParamQuery("token", token)
-                .appendParamQuery("status", UserBStatusEnum.ACTIVE)
-                .build())
+        val user = userBDAO.retrieve(userBDAO.createBuilder()
+            .appendParamQuery("token", token)
+            .appendParamQuery("status", UserBStatusEnum.ACTIVE)
+            .build())
 
-            if (user?.idRole != null) {
-                val role = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
-                user.role = role
-            }
-            return user
+        if (user?.idRole != null) {
+            val role = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
+            user.role = role
         }
-        throw NotAuthorizedException("user_not_found_or_invalid_token")
+        return user
     }
 
     fun retrieveRole(id: String?): BackofficeRole? {
