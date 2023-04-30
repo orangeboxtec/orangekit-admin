@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.orangebox.kit.admin"
-version = "1.0.14"
+version = "1.0.15"
 
 repositories {
     mavenCentral()
@@ -27,6 +27,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-resteasy-reactive")
+    implementation("com.jayway.jsonpath:json-path:2.8.0")
 
     implementation("com.orangebox.kit.core:orangekit-core:1.0.9")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")

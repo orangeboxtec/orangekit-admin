@@ -1,7 +1,6 @@
 package com.orangebox.kit.admin.userb
 
 import com.orangebox.kit.admin.role.BackofficeRole
-import com.orangebox.kit.core.address.AddressInfo
 import com.orangebox.kit.core.annotation.OKEntity
 import com.orangebox.kit.core.annotation.OKId
 import com.orangebox.kit.core.user.GeneralUser
@@ -62,6 +61,8 @@ class UserB: GeneralUser {
 	var language: String? = null
 
 	var urlImage: String? = null
+
+	var respRecaptcha: String? = null
 
     constructor()
     constructor(id: String?) {

@@ -1,5 +1,6 @@
 package com.orangebox.kit.admin.userb
 
+import com.jayway.jsonpath.JsonPath
 import com.orangebox.kit.admin.role.BackofficeRole
 import com.orangebox.kit.admin.role.BackofficeRoleDAO
 import com.orangebox.kit.admin.util.TokenValidatorProvider
@@ -19,12 +20,20 @@ import com.orangebox.kit.notification.NotificationService
 import com.orangebox.kit.notification.TypeSendingNotificationEnum
 import com.orangebox.kit.notification.email.data.EmailDataTemplate
 import org.eclipse.microprofile.config.inject.ConfigProperty
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
+import javax.ws.rs.NotAuthorizedException
+import kotlin.collections.HashMap
+
 
 @ApplicationScoped
 class UserBService {
@@ -62,6 +71,13 @@ class UserBService {
     @ConfigProperty(name = "orangekit.admin.ssoflow", defaultValue = "false")
     private lateinit var ssoFlow: String
 
+    @ConfigProperty(name = "orangekit.admin.recaptcha.validation", defaultValue = "false")
+    private lateinit var recaptchaValidation: String
+
+    @ConfigProperty(name = "orangekit.admin.recaptcha.secret", defaultValue = "false")
+    private lateinit var recaptchaSecret: String
+
+
     private val QUANTITY_PAGE = 12
     @PostConstruct
     fun pos() {
@@ -79,6 +95,8 @@ class UserBService {
             throw BusinessException("sso_flow_enabled")
         }
 
+        validateRecaptcha(user)
+
         val userDB =  userBDAO.retrieve(userBDAO.createBuilder()
             .appendParamQuery("email", user.email!!)
             .appendParamQuery("status", "ACTIVE")
@@ -92,6 +110,29 @@ class UserBService {
             userDB
         } else {
             throw BusinessException("user_blocked")
+        }
+    }
+
+    fun validateRecaptcha(user: UserB){
+        if(recaptchaValidation.toBoolean()){
+            if(user.respRecaptcha == null){
+                throw BusinessException("field_respRecaptcha_required")
+            }
+
+            val url = URL("https://www.google.com/recaptcha/api/siteverify")
+            val con: HttpURLConnection = url.openConnection() as HttpURLConnection
+            con.requestMethod = "POST"
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+            con.doOutput = true
+
+            val body = "secret=$recaptchaSecret&response=${user.respRecaptcha}"
+            val wr = OutputStreamWriter(con.outputStream)
+            wr.write(body)
+            wr.flush()
+            val resp = JsonPath.read(String(con.inputStream.readAllBytes()), "success") as Boolean
+            if(!resp){
+                throw BusinessException("invalid_recaptcha_key")
+            }
         }
     }
 
@@ -324,14 +365,19 @@ class UserBService {
     }
 
     fun retrieveByToken(token: String): UserB? {
-        val user = userBDAO.retrieve(userBDAO.createBuilder()
-            .appendParamQuery("token", token)
-            .build())
-        if (user?.idRole != null) {
-            val role = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
-            user.role = role
+        if(checkToken(token) == true){
+            val user = userBDAO.retrieve(userBDAO.createBuilder()
+                .appendParamQuery("token", token)
+                .appendParamQuery("status", UserBStatusEnum.ACTIVE)
+                .build())
+
+            if (user?.idRole != null) {
+                val role = backofficeRoleDAO.retrieve(BackofficeRole(user.idRole))
+                user.role = role
+            }
+            return user
         }
-        return user
+        throw NotAuthorizedException("user_not_found_or_invalid_token")
     }
 
     fun retrieveRole(id: String?): BackofficeRole? {
