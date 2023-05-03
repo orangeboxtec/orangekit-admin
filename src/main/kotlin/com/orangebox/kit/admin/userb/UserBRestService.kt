@@ -52,6 +52,17 @@ class UserBRestService : AdminBaseRestService() {
 
     @GET
     @SecuredAdmin
+    @Path("/logout")
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    fun logout() {
+        val userB = userTokenSession
+        if (userB != null) {
+            userBService.logout(userB)
+        }
+    }
+
+    @GET
+    @SecuredAdmin
     @Path("/userBSession")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     fun userBSession(): UserB? {

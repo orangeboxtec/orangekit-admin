@@ -148,6 +148,12 @@ class UserBService {
         }
     }
 
+    fun logout(user: UserB){
+        user.token = null
+        user.tokenExpirationDate = null
+        userBDAO.update(user)
+    }
+
     fun authenticate(user: UserB): LoginInfo? {
         var info: LoginInfo?
         val userDB = authenticateMobile(user)
