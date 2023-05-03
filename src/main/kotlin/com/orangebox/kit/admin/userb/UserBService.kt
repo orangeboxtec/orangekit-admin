@@ -662,6 +662,9 @@ class UserBService {
         if (userDB.status != null && userDB.status == UserBStatusEnum.BLOCKED) {
             throw BusinessException("user_blocked")
         }
+        if (userDB.token == null) {
+            throw BusinessException("user_must_login_first")
+        }
         createToken(userDB)
         return userDB
     }
