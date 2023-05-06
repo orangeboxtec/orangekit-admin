@@ -5,6 +5,7 @@ import com.orangebox.kit.core.annotation.OKEntity
 import com.orangebox.kit.core.annotation.OKId
 import com.orangebox.kit.core.user.GeneralUser
 import java.util.*
+import kotlin.collections.HashMap
 
 @OKEntity(name = "userB")
 class UserB: GeneralUser {
@@ -54,7 +55,7 @@ class UserB: GeneralUser {
 
 	var role: BackofficeRole? = null
 
-	var info: Map<String, Any>? = null
+	var info: HashMap<String, Any>? = null
 
     var lastLogin: Date? = null
 
