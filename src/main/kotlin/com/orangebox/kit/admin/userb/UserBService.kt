@@ -646,7 +646,7 @@ class UserBService {
 
     fun saveAvatar(file: FileUpload){
         val userb = retrieve(file.idObject) ?: throw BusinessException("user_not_foud")
-        val url = bucketService.saveFile(file, "userb", null, "image/jpg")
+        val url = bucketService.saveFile(file, userb.id!!, "userb", "image/jpg")
         userb.urlImage = url
         userBDAO.update(userb)
     }
