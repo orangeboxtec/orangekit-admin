@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.orangebox.kit.admin"
-version = "1.0.21"
+version = "1.0.22"
 
 repositories {
     mavenCentral()
@@ -29,7 +29,7 @@ dependencies {
     implementation("io.quarkus:quarkus-resteasy-reactive")
     implementation("com.jayway.jsonpath:json-path:2.8.0")
 
-    implementation("com.orangebox.kit.core:orangekit-core:1.0.10")
+    implementation("com.orangebox.kit.core:orangekit-core:1.0.13")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")
     implementation("com.orangebox.kit.notification:orangekit-notification:1.0.3")
 

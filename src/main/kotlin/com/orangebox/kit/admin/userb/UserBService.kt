@@ -14,14 +14,13 @@ import com.orangebox.kit.core.dao.SearchBuilder
 import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.exception.BusinessException
 import com.orangebox.kit.core.photo.FileUpload
+import com.orangebox.kit.core.user.UserCard
 import com.orangebox.kit.core.utils.SecUtils
 import com.orangebox.kit.notification.NotificationBuilder
 import com.orangebox.kit.notification.NotificationService
 import com.orangebox.kit.notification.TypeSendingNotificationEnum
 import com.orangebox.kit.notification.email.data.EmailDataTemplate
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -31,8 +30,6 @@ import java.util.logging.Logger
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
-import javax.ws.rs.NotAuthorizedException
-import kotlin.collections.HashMap
 
 
 @ApplicationScoped
@@ -387,18 +384,13 @@ class UserBService {
         return backofficeRoleDAO.retrieve(BackofficeRole(id))
     }
 
-    fun userCard(idUser: String): UserBCard? {
+    fun userCard(idUser: String): UserCard? {
         val user = retrieve(idUser) ?: throw BusinessException("user_not_found")
         return userCard(user)
     }
 
-    fun userCard(user: UserB): UserBCard {
-        val userCard = UserBCard()
-        userCard.id = user.id
-        userCard.name = user.name
-        userCard.lastName = user.lastName
-        userCard.urlImage = user.urlImage
-        return userCard
+    fun userCard(user: UserB): UserCard {
+        return user.toCard()
     }
 
     fun listAdminUsers(): List<UserB?>? {
