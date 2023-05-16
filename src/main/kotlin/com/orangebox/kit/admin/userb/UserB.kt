@@ -25,9 +25,9 @@ class UserB: GeneralUser {
 
     var idRole: String? = null
 
-	var name: String? = null
+	override var name: String? = null
 
-	var lastName: String? = null
+	override var lastName: String? = null
 
 	var document: String? = null
 
@@ -61,7 +61,7 @@ class UserB: GeneralUser {
 
 	var language: String? = null
 
-	var urlImage: String? = null
+	override var urlImage: String? = null
 
 	var respRecaptcha: String? = null
 
