@@ -667,7 +667,7 @@ class UserBService {
     }
 
     fun saveAnonymous(user: UserB): UserB? {
-        if(!recaptchaValidation.toBoolean()){
+        if(!userAnonymous.toBoolean()){
             throw BusinessException("save_anonymous_not_supported")
         }
         if (user.id == null) {
