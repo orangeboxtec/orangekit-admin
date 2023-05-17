@@ -74,6 +74,11 @@ class UserBService {
     @ConfigProperty(name = "orangekit.admin.recaptcha.secret", defaultValue = "false")
     private lateinit var recaptchaSecret: String
 
+    @ConfigProperty(name = "orangekit.admin.user.anonymous", defaultValue = "false")
+    private lateinit var userAnonymous: String
+
+
+
 
     private val QUANTITY_PAGE = 12
     @PostConstruct
@@ -659,5 +664,18 @@ class UserBService {
         }
         createToken(userDB)
         return userDB
+    }
+
+    fun saveAnonymous(user: UserB): UserB? {
+        if(!recaptchaValidation.toBoolean()){
+            throw BusinessException("save_anonymous_not_supported")
+        }
+        if (user.id == null) {
+            user.creationDate = Date()
+            user.type = "anonymous"
+            createToken(user)
+            userBDAO.insert(user)
+        }
+        return user
     }
 }

@@ -87,6 +87,16 @@ class UserBRestService : AdminBaseRestService() {
     }
 
 
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Path("/saveAnonymous")
+    fun saveAnonymous(userB: UserB): UserB {
+        userBService.saveAnonymous(userB)
+        return userB
+    }
+
+
     @GET
     @SecuredAdmin
     @Path("/listAllRoles")
