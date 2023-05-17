@@ -650,20 +650,31 @@ class UserBService {
 
     fun autoLogin(user: UserB): UserB? {
         val userDB = userBDAO.retrieve(UserB(user.id))
-        if (userDB == null || user.password == null) {
-            throw BusinessException("user_not_found")
+        if(!userAnonymous.toBoolean()){
+            if (userDB == null || user.password == null) {
+                throw BusinessException("user_not_found")
+            }
+            if (userDB.password == null || user.password != userDB.password) {
+                throw BusinessException("invalid_user_password")
+            }
+            if (userDB.status != null && userDB.status == UserBStatusEnum.BLOCKED) {
+                throw BusinessException("user_blocked")
+            }
+            if (userDB.token == null) {
+                throw BusinessException("user_must_login_first")
+            }
+            createToken(userDB)
+            return userDB
+        } else {
+            if (userDB == null) {
+                throw BusinessException("user_not_found")
+            }
+            if (userDB.token == null) {
+                throw BusinessException("user_no_token")
+            }
+            createToken(userDB)
+            return userDB
         }
-        if (userDB.password == null || user.password != userDB.password) {
-            throw BusinessException("invalid_user_password")
-        }
-        if (userDB.status != null && userDB.status == UserBStatusEnum.BLOCKED) {
-            throw BusinessException("user_blocked")
-        }
-        if (userDB.token == null) {
-            throw BusinessException("user_must_login_first")
-        }
-        createToken(userDB)
-        return userDB
     }
 
     fun saveAnonymous(user: UserB): UserB? {
