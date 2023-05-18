@@ -5,6 +5,7 @@ import com.orangebox.kit.admin.role.Role
 import com.orangebox.kit.admin.util.AdminBaseRestService
 import com.orangebox.kit.admin.util.SecuredAdmin
 import com.orangebox.kit.authkey.UserAuthKey
+import com.orangebox.kit.core.apptoken.SecuredApp
 import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.photo.FileUpload
 import java.io.*
@@ -77,6 +78,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.listUsersByRole(roleId)
     }
 
+    @SecuredApp
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
@@ -86,7 +88,7 @@ class UserBRestService : AdminBaseRestService() {
         return userB
     }
 
-
+    @SecuredApp
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
