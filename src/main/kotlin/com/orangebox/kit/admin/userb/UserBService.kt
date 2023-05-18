@@ -279,7 +279,15 @@ class UserBService {
         if (userDBEmail != null && userDBEmail.id != user.id) {
             throw BusinessException("email_already_registred")
         }
-        val userDB = userBDAO.retrieve(UserB(user.id))!!
+        val userDB = userBDAO.retrieve(UserB(user.id))
+            ?: if(ssoFlow.toBoolean()){
+                createNewUser(user)
+                return
+            }
+            else {
+                throw BusinessException("email_not_found")
+            }
+
         if (user.emailConfirmed != null) {
             userDB.emailConfirmed = user.emailConfirmed
         }
