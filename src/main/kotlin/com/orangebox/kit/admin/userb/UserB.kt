@@ -27,6 +27,8 @@ class UserB: GeneralUser {
 
 	override var name: String? = null
 
+	var username: String? = null
+
 	override var lastName: String? = null
 
 	var document: String? = null
