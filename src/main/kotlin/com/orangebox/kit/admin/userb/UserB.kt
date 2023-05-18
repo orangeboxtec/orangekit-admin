@@ -65,6 +65,8 @@ class UserB: GeneralUser {
 
 	var respRecaptcha: String? = null
 
+	var appId: String? = null
+
     constructor()
     constructor(id: String?) {
         this.id = id
