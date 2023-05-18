@@ -99,10 +99,18 @@ class UserBService {
 
         validateRecaptcha(user)
 
-        val userDB =  userBDAO.retrieve(userBDAO.createBuilder()
+        var userDB =  userBDAO.retrieve(userBDAO.createBuilder()
             .appendParamQuery("email", user.email!!)
             .appendParamQuery("status", "ACTIVE")
-            .build()) ?: throw BusinessException("user_not_found")
+            .build())
+
+        if(userDB == null){
+            userDB =  userBDAO.retrieve(userBDAO.createBuilder()
+                .appendParamQuery("username", user.email!!)
+                .appendParamQuery("status", "ACTIVE")
+                .build()) ?: throw BusinessException("user_not_found")
+        }
+
         val passHash: String = SecUtils.generateHash(userDB.salt, password)
         if (userDB.password != passHash) {
             throw BusinessException("invalid_password")
