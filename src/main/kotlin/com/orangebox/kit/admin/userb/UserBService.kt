@@ -221,6 +221,14 @@ class UserBService {
         if (userDB != null) {
             throw BusinessException("email_already_registred")
         }
+        if (user.username != null && user.username != "") {
+            userDB = userBDAO.retrieve(userBDAO.createBuilder()
+                .appendParamQuery("username", user.username!!)
+                .build())
+        }
+        if (userDB != null) {
+            throw BusinessException("username_already_registred")
+        }
         if (user.status == null) {
             user.status = UserBStatusEnum.ACTIVE
         }
