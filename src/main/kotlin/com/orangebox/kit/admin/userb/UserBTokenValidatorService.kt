@@ -22,7 +22,7 @@ class UserBTokenValidatorService: TokenValidator {
     override fun checkToken(token: String): Boolean {
         var validated = true
         val user = userBService.retrieveByToken(token)
-        if (user!!.token == null || user.token != token || user.tokenExpirationDate!!.before(Date())) {
+        if (user == null || user.token == null || user.token != token || user.tokenExpirationDate!!.before(Date())) {
             validated = if(appToken.toBoolean()){
                 appTokenService.checkAppToken(token)
             } else {
