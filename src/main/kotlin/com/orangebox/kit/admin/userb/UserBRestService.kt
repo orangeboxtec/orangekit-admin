@@ -8,6 +8,8 @@ import com.orangebox.kit.authkey.UserAuthKey
 import com.orangebox.kit.core.apptoken.SecuredApp
 import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.photo.FileUpload
+import io.quarkus.security.UnauthorizedException
+import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.io.*
 import java.net.http.HttpRequest
 import javax.inject.Inject
@@ -24,7 +26,8 @@ class UserBRestService : AdminBaseRestService() {
     @Context
     private val requestB: HttpRequest? = null
 
-
+    @ConfigProperty(name = "orangekit.admin.ssoflow", defaultValue = "false")
+    private lateinit var ssoFlow: String
 
     @POST
     @Path("/authenticate")
@@ -39,6 +42,9 @@ class UserBRestService : AdminBaseRestService() {
     @Path("/load/{idUserB}")
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     fun load(@PathParam("idUserB") idUserB: String): UserB? {
+        if(ssoFlow.toBoolean()){
+            throw UnauthorizedException("sso_activated")
+        }
         return userBService.retrieve(idUserB)
     }
 
@@ -146,6 +152,9 @@ class UserBRestService : AdminBaseRestService() {
     @Produces("application/json;charset=utf-8")
     @Path("/searchAdmin")
     fun searchAdmin(userSearch: UserBSearch): UserBResultSearch? {
+        if(ssoFlow.toBoolean()){
+            throw UnauthorizedException("sso_activated")
+        }
         if (userSearch.idObj == null) {
             userSearch.idObj = userTokenSession?.idObj
         }
