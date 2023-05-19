@@ -351,6 +351,9 @@ class UserBService {
         if (user.idObj != null) {
             userDB.idObj = user.idObj
         }
+        if (user.urlImage != null) {
+            userDB.urlImage = user.urlImage
+        }
         userBDAO.update(userDB)
     }
 
