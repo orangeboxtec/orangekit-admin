@@ -7,7 +7,7 @@ import com.orangebox.kit.admin.util.SecuredAdmin
 import com.orangebox.kit.authkey.UserAuthKey
 import com.orangebox.kit.core.apptoken.SecuredApp
 import com.orangebox.kit.core.dto.ResponseList
-import com.orangebox.kit.core.photo.FileUpload
+import com.orangebox.kit.core.file.FileUpload
 import io.quarkus.security.UnauthorizedException
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.io.*

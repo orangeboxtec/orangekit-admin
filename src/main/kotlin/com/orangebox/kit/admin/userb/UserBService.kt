@@ -13,7 +13,7 @@ import com.orangebox.kit.core.dao.OperationEnum
 import com.orangebox.kit.core.dao.SearchBuilder
 import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.exception.BusinessException
-import com.orangebox.kit.core.photo.FileUpload
+import com.orangebox.kit.core.file.FileUpload
 import com.orangebox.kit.core.user.UserCard
 import com.orangebox.kit.core.utils.SecUtils
 import com.orangebox.kit.notification.NotificationBuilder
