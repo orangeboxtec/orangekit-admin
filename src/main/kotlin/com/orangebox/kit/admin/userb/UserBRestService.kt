@@ -98,6 +98,16 @@ class UserBRestService : AdminBaseRestService() {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
+    @Path("/saveInfo")
+    fun saveInfo(userB: UserB): UserB {
+        userBService.saveInfo(userB)
+        return userB
+    }
+
+    @SecuredApp
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Path("/saveAnonymous")
     fun saveAnonymous(userB: UserB): UserB {
         userBService.saveAnonymous(userB)

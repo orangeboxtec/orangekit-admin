@@ -30,6 +30,7 @@ import java.util.logging.Logger
 import javax.annotation.PostConstruct
 import javax.enterprise.context.ApplicationScoped
 import javax.inject.Inject
+import kotlin.collections.HashMap
 
 
 @ApplicationScoped
@@ -379,6 +380,18 @@ class UserBService {
         } else {
             updateUser(user)
         }
+    }
+
+
+    fun saveInfo(user: UserB) {
+        val userDB = userBDAO.retrieve(user.id!!) ?: throw BusinessException("user_not_found")
+        if(userDB.info == null){
+            userDB.info = HashMap()
+        }
+        user.info?.keys?.forEach { key ->
+            userDB.info!![key] = user.info!![key]!!
+        }
+        userBDAO.update(userDB)
     }
 
     fun retrieve(id: String?): UserB? {
