@@ -94,7 +94,7 @@ class UserBRestService : AdminBaseRestService() {
         return userB
     }
 
-    @SecuredApp
+    @SecuredAdmin
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
