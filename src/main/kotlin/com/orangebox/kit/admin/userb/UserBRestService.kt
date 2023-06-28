@@ -84,7 +84,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.listUsersByRole(roleId)
     }
 
-    @SecuredApp
+    @SecuredAdmin
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
