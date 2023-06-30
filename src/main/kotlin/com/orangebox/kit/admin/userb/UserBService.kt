@@ -379,14 +379,14 @@ class UserBService {
             if(nullPasword && updatedPasswordTemplateId != "ERROR"){
                 notificationService.sendNotification(
                     NotificationBuilder()
-                        .setTo(user)
+                        .setTo(userBase)
                         .setTypeSending(TypeSendingNotificationEnum.EMAIL)
                         .setFgAlertOnly(true)
                         .setEmailDataTemplate(object : EmailDataTemplate {
                             override val data: Map<String?, Any?>
                                 get() {
                                     val params: MutableMap<String?, Any?> = HashMap()
-                                    params["user_name"] = user.name
+                                    params["user_name"] = userBase.name
                                     return params
                                 }
                             override val templateId: Int
