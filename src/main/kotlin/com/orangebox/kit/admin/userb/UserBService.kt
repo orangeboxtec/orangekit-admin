@@ -63,6 +63,9 @@ class UserBService {
     @ConfigProperty(name = "orangekit.admin.email.forgotpassword.templateid", defaultValue = "ERROR")
     private lateinit var forgotEmailTemplateId: String
 
+    @ConfigProperty(name = "orangekit.admin.email.updatedpassword.templateid", defaultValue = "ERROR")
+    private lateinit var updatedPasswordTemplateId: String
+
     @ConfigProperty(name = "orangekit.core.projecturl", defaultValue = "http://localhost:4200")
     private lateinit var projectUrl: String
 
@@ -368,9 +371,30 @@ class UserBService {
     fun updatePasswordForgot(user: UserB) {
         val userBase = userBDAO.retrieve(user)
         if (userBase != null) {
+            val nullPasword = userBase.password == null
             userBase.salt = SecUtils.salt
             userBase.password = SecUtils.generateHash(userBase.salt, user.password!!)
             userBDAO.update(userBase)
+
+            if(nullPasword && updatedPasswordTemplateId != "ERROR"){
+                notificationService.sendNotification(
+                    NotificationBuilder()
+                        .setTo(user)
+                        .setTypeSending(TypeSendingNotificationEnum.EMAIL)
+                        .setFgAlertOnly(true)
+                        .setEmailDataTemplate(object : EmailDataTemplate {
+                            override val data: Map<String?, Any?>
+                                get() {
+                                    val params: MutableMap<String?, Any?> = HashMap()
+                                    params["user_name"] = user.name
+                                    return params
+                                }
+                            override val templateId: Int
+                                get() = updatedPasswordTemplateId.toInt()
+                        })
+                        .build()
+                )
+            }
         }
     }
 
