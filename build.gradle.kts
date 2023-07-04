@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.orangebox.kit.admin"
-version = "1.0.44"
+version = "1.0.45"
 
 repositories {
     mavenCentral()
@@ -32,7 +32,7 @@ dependencies {
 
     implementation("com.orangebox.kit.core:orangekit-core:1.0.18")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")
-    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.4")
+    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.5")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
