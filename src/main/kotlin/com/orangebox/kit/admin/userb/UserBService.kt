@@ -218,6 +218,11 @@ class UserBService {
     }
 
     fun createNewUser(user: UserB): UserB? {
+        return createNewUser(user, null)
+    }
+
+    fun createNewUser(user: UserB, templateId: Int?): UserB? {
+        val templateEmail = templateId ?: welcomeEmailTemplateId.toInt()
         var userDB: UserB? = null
         if (user.email != null && user.email != "") {
             userDB = retrieveByEmail(user.email!!)
@@ -275,7 +280,7 @@ class UserBService {
                                 return params
                             }
                         override val templateId: Int
-                            get() = welcomeEmailTemplateId.toInt()
+                            get() = templateEmail
                     })
                     .build()
             )
