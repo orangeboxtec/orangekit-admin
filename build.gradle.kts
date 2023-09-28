@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.orangebox.kit.admin"
-version = "1.0.47"
+version = "1.0.48"
 
 repositories {
     mavenCentral()
@@ -31,7 +31,7 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path:2.8.0")
     implementation("org.mongodb:bson:4.9.1")
 
-    implementation("com.orangebox.kit.core:orangekit-core:1.0.18")
+    implementation("com.orangebox.kit.core:orangekit-core:1.0.21")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")
     implementation("com.orangebox.kit.notification:orangekit-notification:1.0.5")
 
