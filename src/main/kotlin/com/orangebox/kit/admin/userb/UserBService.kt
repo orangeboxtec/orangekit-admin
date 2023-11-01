@@ -621,6 +621,14 @@ class UserBService {
                 sb.setFirst(10 * (userSearch.page!! - 1))
                 sb.setMaxResults(10)
             }
+            if (userSearch.info != null) {
+                userSearch.info?.keys?.forEach { key ->
+                    if(userSearch.info!![key] != null){
+                        sb.appendParamQuery("info.$key", userSearch.info!![key]!!)
+                    }
+                }
+            }
+
             sb.appendSort("name", 1)
             val list = userBDAO.search(sb.build())
             val totalAmount = totalAmount(sb)

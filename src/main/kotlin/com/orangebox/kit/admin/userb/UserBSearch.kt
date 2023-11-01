@@ -1,5 +1,7 @@
 package com.orangebox.kit.admin.userb
 
+import java.util.HashMap
+
 class UserBSearch {
 
     var queryString: String? = null
@@ -19,4 +21,6 @@ class UserBSearch {
     var userBName: String? = null
 
     var userBDocument: String? = null
+
+    var info: HashMap<String, Any>? = null
 }
