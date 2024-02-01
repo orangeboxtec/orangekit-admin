@@ -31,9 +31,9 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path:2.8.0")
     implementation("org.mongodb:bson:4.9.1")
 
-    implementation("com.orangebox.kit.core:orangekit-core:1.0.21")
+    implementation("com.orangebox.kit.core:orangekit-core:1.0.22")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:1.0.1")
-    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.5")
+    implementation("com.orangebox.kit.notification:orangekit-notification:1.0.6")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
