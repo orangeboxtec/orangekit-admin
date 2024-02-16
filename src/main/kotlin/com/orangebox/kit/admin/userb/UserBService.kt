@@ -20,6 +20,9 @@ import com.orangebox.kit.notification.NotificationBuilder
 import com.orangebox.kit.notification.NotificationService
 import com.orangebox.kit.notification.TypeSendingNotificationEnum
 import com.orangebox.kit.notification.email.data.EmailDataTemplate
+import jakarta.annotation.PostConstruct
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -27,9 +30,6 @@ import java.net.URL
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
-import javax.annotation.PostConstruct
-import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 
 
 @ApplicationScoped

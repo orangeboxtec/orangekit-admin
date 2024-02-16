@@ -1,10 +1,10 @@
 package com.orangebox.kit.admin.util
 
 import com.orangebox.kit.admin.userb.UserBTokenValidatorService
+import jakarta.annotation.PostConstruct
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import javax.annotation.PostConstruct
-import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 import javax.naming.InitialContext
 
 @ApplicationScoped

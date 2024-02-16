@@ -2,10 +2,10 @@ package com.orangebox.kit.admin.userb
 
 import com.orangebox.kit.admin.util.TokenValidator
 import com.orangebox.kit.core.apptoken.AppTokenService
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.util.*
-import javax.enterprise.context.ApplicationScoped
-import javax.inject.Inject
 
 @ApplicationScoped
 class UserBTokenValidatorService: TokenValidator {

@@ -1,7 +1,7 @@
 package com.orangebox.kit.admin.userb
 
 import com.orangebox.kit.core.dao.AbstractDAO
-import javax.enterprise.context.ApplicationScoped
+import jakarta.enterprise.context.ApplicationScoped
 
 @ApplicationScoped
 class UserBDAO : AbstractDAO<UserB>(UserB::class.java) {

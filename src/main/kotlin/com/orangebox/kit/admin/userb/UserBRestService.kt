@@ -9,13 +9,12 @@ import com.orangebox.kit.core.apptoken.SecuredApp
 import com.orangebox.kit.core.dto.ResponseList
 import com.orangebox.kit.core.file.FileUpload
 import io.quarkus.security.UnauthorizedException
+import jakarta.inject.Inject
+import jakarta.ws.rs.*
+import jakarta.ws.rs.core.Context
+import jakarta.ws.rs.core.MediaType
 import org.eclipse.microprofile.config.inject.ConfigProperty
-import java.io.*
 import java.net.http.HttpRequest
-import javax.inject.Inject
-import javax.ws.rs.*
-import javax.ws.rs.core.Context
-import javax.ws.rs.core.MediaType
 
 @Path("/userBackoffice")
 class UserBRestService : AdminBaseRestService() {

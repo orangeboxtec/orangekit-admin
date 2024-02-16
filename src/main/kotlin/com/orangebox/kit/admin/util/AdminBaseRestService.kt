@@ -2,9 +2,9 @@ package com.orangebox.kit.admin.util
 
 import com.orangebox.kit.admin.userb.UserB
 import com.orangebox.kit.admin.userb.UserBService
+import jakarta.inject.Inject
+import jakarta.ws.rs.NotAuthorizedException
 import org.jboss.resteasy.reactive.RestHeader
-import javax.inject.Inject
-import javax.ws.rs.NotAuthorizedException
 
 
 open class AdminBaseRestService {

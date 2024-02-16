@@ -4,10 +4,8 @@ import com.orangebox.kit.admin.role.BackofficeRole
 import com.orangebox.kit.core.annotation.OKEntity
 import com.orangebox.kit.core.annotation.OKId
 import com.orangebox.kit.core.user.GeneralUser
-import org.bson.codecs.pojo.annotations.BsonIgnore
+import jakarta.json.bind.annotation.JsonbTransient
 import java.util.*
-import javax.json.bind.annotation.JsonbTransient
-import kotlin.collections.HashMap
 
 @OKEntity(name = "userB")
 class UserB: GeneralUser {
