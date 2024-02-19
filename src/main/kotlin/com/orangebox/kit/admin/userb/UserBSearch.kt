@@ -22,5 +22,7 @@ class UserBSearch {
 
     var userBDocument: String? = null
 
+    var groupName: String? = null
+
     var info: HashMap<String, Any>? = null
 }
