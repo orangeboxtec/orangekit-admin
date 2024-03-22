@@ -72,6 +72,10 @@ class UserB: GeneralUser {
 
 	var appId: String? = null
 
+	var driverLicense: String? = null
+
+	var licenseDriver: String? = null
+
     constructor()
     constructor(id: String?) {
         this.id = id
