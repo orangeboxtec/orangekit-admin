@@ -74,7 +74,7 @@ class UserB: GeneralUser {
 
 	var driverLicense: String? = null
 
-	var licenseDriver: String? = null
+	var licenseCategory: List<String>? = null
 
     constructor()
     constructor(id: String?) {

@@ -365,8 +365,8 @@ class UserBService {
         if (user.driverLicense != null) {
             userDB.driverLicense = user.driverLicense
         }
-        if (user.licenseDriver != null) {
-            userDB.licenseDriver = user.licenseDriver
+        if (user.licenseCategory != null) {
+            userDB.licenseCategory = user.licenseCategory
         }
         userBDAO.update(userDB)
     }
