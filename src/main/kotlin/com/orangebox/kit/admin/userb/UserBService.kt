@@ -362,6 +362,12 @@ class UserBService {
         if (user.urlImage != null) {
             userDB.urlImage = user.urlImage
         }
+        if (user.driverLicense != null) {
+            userDB.driverLicense = user.driverLicense
+        }
+        if (user.licenseCategory != null) {
+            userDB.licenseCategory = user.licenseCategory
+        }
         userBDAO.update(userDB)
     }
 
