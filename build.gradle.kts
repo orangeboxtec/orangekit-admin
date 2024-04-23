@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.orangebox.kit.admin"
-version = "2.0.2"
+version = "2.0.3"
 
 repositories {
     mavenCentral()
@@ -26,10 +26,10 @@ val quarkusPlatformVersion: String by project
 dependencies {
     implementation(platform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-resteasy-reactive-jsonb")
+    implementation("io.quarkus:quarkus-resteasy-reactive")
     implementation("io.quarkus:quarkus-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.quarkus:quarkus-arc")
-    implementation("io.quarkus:quarkus-resteasy-reactive")
     implementation("com.jayway.jsonpath:json-path:2.8.0")
     implementation("org.mongodb:bson:4.9.1")
 
