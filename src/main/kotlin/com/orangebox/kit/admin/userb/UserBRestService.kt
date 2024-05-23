@@ -188,7 +188,7 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.searchResponse(userBSearch)
     }
 
-    //@SecuredAdmin
+    @SecuredAdmin
     @POST
     @Consumes("application/json")
     @Produces("application/json;charset=utf-8")
