@@ -80,7 +80,8 @@ class UserBService {
     @ConfigProperty(name = "orangekit.admin.user.anonymous", defaultValue = "false")
     private lateinit var userAnonymous: String
 
-
+    @ConfigProperty(name = "orangekit.vcomm.apiurl", defaultValue = "false")
+    private lateinit var apiUrl: String
 
 
     private val QUANTITY_PAGE = 12
@@ -243,6 +244,11 @@ class UserBService {
         if (user.language == null) {
             user.language = "pt"
         }
+        if (user.info == null) {
+            user.info = hashMapOf<String, Any>("baseUrl" to apiUrl)
+        } else {
+            user.info!!["baseUrl"] = apiUrl
+        }
         if (user.password != null) {
             user.salt = SecUtils.salt
             user.password = SecUtils.generateHash(user.salt, user.password!!)
@@ -287,7 +293,7 @@ class UserBService {
         return user
     }
 
-    fun updateUser(user: UserB) {
+    fun updateUser(user: UserB): UserB {
         var userDBEmail: UserB? = null
         if (user.email != null && user.email != "") {
             userDBEmail = retrieveByEmail(user.email!!)
@@ -298,7 +304,7 @@ class UserBService {
         val userDB = userBDAO.retrieve(UserB(user.id))
             ?: if(ssoFlow.toBoolean()){
                 createNewUser(user)
-                return
+                return user
             }
             else {
                 throw BusinessException("email_not_found")
@@ -369,6 +375,7 @@ class UserBService {
             userDB.licenseCategory = user.licenseCategory
         }
         userBDAO.update(userDB)
+        return userDB
     }
 
     fun updatePassword(user: UserB) {
@@ -408,11 +415,11 @@ class UserBService {
         }
     }
 
-    fun saveUser(user: UserB?) {
+    fun saveUser(user: UserB?): UserB? {
         if (user!!.id == null) {
-            createNewUser(user)
+            return createNewUser(user)
         } else {
-            updateUser(user)
+            return updateUser(user)
         }
     }
 

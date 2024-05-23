@@ -88,9 +88,8 @@ class UserBRestService : AdminBaseRestService() {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
     @Path("/saveUser")
-    fun saveUser(userB: UserB): UserB {
-        userBService.saveUser(userB)
-        return userB
+    fun saveUser(userB: UserB): UserB? {
+        return userBService.saveUser(userB)
     }
 
     @SecuredAdmin
