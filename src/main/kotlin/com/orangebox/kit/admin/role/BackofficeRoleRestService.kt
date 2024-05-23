@@ -35,7 +35,7 @@ class BackofficeRoleRestService : AdminBaseRestService() {
     fun search(@PathParam("version")version: String): List<BackofficeRole>? {
         val roles = backofficeRoleDAO.search(backofficeRoleDAO.createBuilder().build())
         if (version == "lite") {
-            val filtered = roles?.filter { it.name!!.contains("Lite") || it.name!!.contains("ALL") }
+            val filtered = roles?.filter { it.name!!.contains("Lite") || it.id!!.contains("ALL") }
             return filtered
         } else {
             val filtered = roles?.filter { !it.name!!.contains("Lite") }
