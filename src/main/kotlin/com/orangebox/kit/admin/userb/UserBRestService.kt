@@ -188,6 +188,15 @@ class UserBRestService : AdminBaseRestService() {
         return userBService.searchResponse(userBSearch)
     }
 
+    //@SecuredAdmin
+    @POST
+    @Consumes("application/json")
+    @Produces("application/json;charset=utf-8")
+    @Path("/listAllUsers")
+    fun listAllUsersByGroup(userBSearch: UserBSearch): ResponseList<UserB>? {
+        return userBService.listAllUsers(userBSearch)
+    }
+
 
     @SecuredAdmin
     @POST

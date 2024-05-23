@@ -24,6 +24,7 @@ import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
+import org.slf4j.LoggerFactory
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -80,7 +81,7 @@ class UserBService {
     @ConfigProperty(name = "orangekit.admin.user.anonymous", defaultValue = "false")
     private lateinit var userAnonymous: String
 
-
+    private val logger = LoggerFactory.getLogger(UserBService::class.java)
 
 
     private val QUANTITY_PAGE = 12
@@ -657,6 +658,18 @@ class UserBService {
         } else {
             backofficeRoleDAO.update(backofficeRole)
         }
+    }
+
+    fun listAllUsers(userBSearch: UserBSearch): ResponseList<UserB>? {
+        val searchBuilder = userBDAO.createBuilder()
+
+        logger.info("Recebendo : ${userBSearch.queryString}")
+
+      if (userBSearch.queryString != null && userBSearch.queryString!!.isNotEmpty()){
+            searchBuilder.appendParamQuery("info.groups", userBSearch.queryString!!)
+      }
+
+       return userBDAO.searchToResponse(searchBuilder.build())
     }
 
     private fun totalAmount(sb: SearchBuilder): Long {
