@@ -192,11 +192,10 @@ class UserBRestService : AdminBaseRestService() {
     @POST
     @Consumes("application/json")
     @Produces("application/json;charset=utf-8")
-    @Path("/listAllUsers")
+    @Path("/listAllUsersByGroup")
     fun listAllUsersByGroup(userBSearch: UserBSearch): ResponseList<UserB>? {
         return userBService.listAllUsers(userBSearch)
     }
-
 
     @SecuredAdmin
     @POST

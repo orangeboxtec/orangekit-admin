@@ -615,6 +615,9 @@ class UserBService {
             if (userSearch.idObj != null) {
                 sb.appendParamQuery("idObj", userSearch.idObj!!)
             }
+            if (userSearch.groupName != null) {
+                sb.appendParamQuery("info.groups", userSearch.groupName!!)
+            }
             if (userSearch.queryString != null && userSearch.queryString!!.isNotEmpty()) {
                 sb.appendParamQuery("name|nameObj|lastName|document", userSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
             }
