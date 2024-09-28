@@ -33,7 +33,7 @@ import java.util.logging.Logger
 
 
 @ApplicationScoped
-class UserBService {
+open class UserBService {
 
     @Inject
     private lateinit var configurationService: ConfigurationService

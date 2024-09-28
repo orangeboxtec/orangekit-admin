@@ -17,7 +17,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.net.http.HttpRequest
 
 @Path("/userBackoffice")
-class UserBRestService : AdminBaseRestService() {
+open class UserBRestService : AdminBaseRestService() {
 
     @Inject
     private lateinit var userBService: UserBService
