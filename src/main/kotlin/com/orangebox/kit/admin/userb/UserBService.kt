@@ -24,6 +24,7 @@ import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.eclipse.microprofile.config.inject.ConfigProperty
+import org.slf4j.LoggerFactory
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
@@ -80,7 +81,7 @@ open class UserBService {
     @ConfigProperty(name = "orangekit.admin.user.anonymous", defaultValue = "false")
     private lateinit var userAnonymous: String
 
-
+    private val logger = LoggerFactory.getLogger(UserBService::class.java)
 
 
     private val QUANTITY_PAGE = 12
@@ -362,6 +363,12 @@ open class UserBService {
         if (user.urlImage != null) {
             userDB.urlImage = user.urlImage
         }
+        if (user.driverLicense != null) {
+            userDB.driverLicense = user.driverLicense
+        }
+        if (user.licenseCategory != null) {
+            userDB.licenseCategory = user.licenseCategory
+        }
         userBDAO.update(userDB)
     }
 
@@ -608,6 +615,9 @@ open class UserBService {
             if (userSearch.idObj != null) {
                 sb.appendParamQuery("idObj", userSearch.idObj!!)
             }
+            if (userSearch.groupName != null) {
+                sb.appendParamQuery("info.groups", userSearch.groupName!!)
+            }
             if (userSearch.queryString != null && userSearch.queryString!!.isNotEmpty()) {
                 sb.appendParamQuery("name|nameObj|lastName|document", userSearch.queryString!!, OperationEnum.OR_FIELDS_LIKE)
             }
@@ -651,6 +661,18 @@ open class UserBService {
         } else {
             backofficeRoleDAO.update(backofficeRole)
         }
+    }
+
+    fun listAllUsers(userBSearch: UserBSearch): ResponseList<UserB>? {
+        val searchBuilder = userBDAO.createBuilder()
+
+        logger.info("Recebendo : ${userBSearch.queryString}")
+
+      if (userBSearch.queryString != null && userBSearch.queryString!!.isNotEmpty()){
+            searchBuilder.appendParamQuery("info.groups", userBSearch.queryString!!)
+      }
+
+       return userBDAO.searchToResponse(searchBuilder.build())
     }
 
     private fun totalAmount(sb: SearchBuilder): Long {
