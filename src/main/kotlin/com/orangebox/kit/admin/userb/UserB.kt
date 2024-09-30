@@ -4,6 +4,7 @@ import com.orangebox.kit.admin.role.BackofficeRole
 import com.orangebox.kit.core.annotation.OKEntity
 import com.orangebox.kit.core.annotation.OKId
 import com.orangebox.kit.core.user.GeneralUser
+import jakarta.json.bind.annotation.JsonbDateFormat
 import jakarta.json.bind.annotation.JsonbTransient
 import java.util.*
 
@@ -48,6 +49,7 @@ class UserB: GeneralUser {
 
     var type: String? = null
 
+	@JsonbDateFormat(value = "yyyy-MM-dd HH:mm:ss")
     var tokenExpirationDate: Date? = null
 
 	var userConfirmed: Boolean? = null
