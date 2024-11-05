@@ -156,6 +156,7 @@ open class UserBService {
     fun generateSession(user: UserB){
 
         val expCal = Calendar.getInstance()
+        expCal.add(Calendar.HOUR, 12)
         val accessKey = "auzNN7V0aB30poSilNi15HCiE"
         val key = Keys.hmacShaKeyFor(Encoders.BASE64.encode(accessKey.toByteArray()).toByteArray())
         val now = Date()
@@ -167,7 +168,6 @@ open class UserBService {
             .compact()
 
         user.token = jwt
-        expCal.add(Calendar.HOUR, 12)
         user.tokenExpirationDate = expCal.time
         userBDAO.update(user)
         if (user.idRole != null) {
