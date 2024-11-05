@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.orangebox.kit.admin"
-version = "2.0.9"
+version = "2.0.10"
 
 repositories {
     mavenCentral()
@@ -32,6 +32,8 @@ dependencies {
     implementation("io.quarkus:quarkus-resteasy-reactive")
     implementation("com.jayway.jsonpath:json-path:2.8.0")
     implementation("org.mongodb:bson:4.9.1")
+    implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
     implementation("com.orangebox.kit.core:orangekit-core:2.0.1")
     implementation("com.orangebox.kit.authkey:orangekit-authkey:2.0.0")

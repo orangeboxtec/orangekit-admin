@@ -20,6 +20,9 @@ import com.orangebox.kit.notification.NotificationBuilder
 import com.orangebox.kit.notification.NotificationService
 import com.orangebox.kit.notification.TypeSendingNotificationEnum
 import com.orangebox.kit.notification.email.data.EmailDataTemplate
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.io.Encoders
+import io.jsonwebtoken.security.Keys
 import jakarta.annotation.PostConstruct
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
@@ -151,8 +154,19 @@ open class UserBService {
     }
 
     fun generateSession(user: UserB){
-        user.token = UUID.randomUUID().toString()
+
         val expCal = Calendar.getInstance()
+        val accessKey = "auzNN7V0aB30poSilNi15HCiE"
+        val key = Keys.hmacShaKeyFor(Encoders.BASE64.encode(accessKey.toByteArray()).toByteArray())
+        val now = Date()
+        val jwt = Jwts.builder()
+            .claim("data", "flow")
+            .issuedAt(now)
+            .expiration(expCal.time)
+            .signWith(key)
+            .compact()
+
+        user.token = jwt
         expCal.add(Calendar.HOUR, 12)
         user.tokenExpirationDate = expCal.time
         userBDAO.update(user)
