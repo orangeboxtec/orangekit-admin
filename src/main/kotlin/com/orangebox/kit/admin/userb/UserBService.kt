@@ -8,7 +8,6 @@ import com.orangebox.kit.authkey.UserAuthKey
 import com.orangebox.kit.authkey.UserAuthKeyService
 import com.orangebox.kit.authkey.UserAuthKeyTypeEnum
 import com.orangebox.kit.core.bucket.BucketService
-import com.orangebox.kit.core.configuration.ConfigurationService
 import com.orangebox.kit.core.dao.OperationEnum
 import com.orangebox.kit.core.dao.SearchBuilder
 import com.orangebox.kit.core.dto.ResponseList
@@ -39,8 +38,6 @@ import java.util.logging.Logger
 @ApplicationScoped
 open class UserBService {
 
-    @Inject
-    private lateinit var configurationService: ConfigurationService
 
     @Inject
     private lateinit var userAuthKeyService: UserAuthKeyService
@@ -83,6 +80,11 @@ open class UserBService {
 
     @ConfigProperty(name = "orangekit.admin.user.anonymous", defaultValue = "false")
     private lateinit var userAnonymous: String
+
+    @ConfigProperty(name = "orangekit.admin.user.email.link.path", defaultValue = "pages/email_forgot_password_userb")
+    private lateinit var emaiLinkPath: String
+
+
 
     private val logger = LoggerFactory.getLogger(UserBService::class.java)
 
@@ -274,7 +276,7 @@ open class UserBService {
 
         if (user.password == null) {
             val language = user.language!!.substring(1)
-            val link = "$projectUrl/pages/email_forgot_password_userb?l=$language&k=${key.key!!}&u=${user.id!!}&t=${key.type}"
+            val link = "$projectUrl/$emaiLinkPath?l=$language&k=${key.key!!}&u=${user.id!!}&t=${key.type}"
 
             if(welcomeEmailTemplateId == "ERROR"){
                 throw IllegalArgumentException("orangekit.admin.email.welcome.templateid must be provided in .env")
@@ -527,7 +529,7 @@ open class UserBService {
             user.language = "pt"
             updateUser(user)
         }
-        val link = "$projectUrl/pages/email_forgot_password_userb?l=${user.language}&k=${key.key}&u=${user.id}&t=${key.type}"
+        val link = "$projectUrl/$emaiLinkPath?l=${user.language}&k=${key.key}&u=${user.id}&t=${key.type}"
         if(forgotEmailTemplateId == "ERROR"){
             throw IllegalArgumentException("orangekit.admin.email.forgotpassword.templateid must be provided in .env")
         }
