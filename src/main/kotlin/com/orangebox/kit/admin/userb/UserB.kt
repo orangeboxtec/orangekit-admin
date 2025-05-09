@@ -26,6 +26,8 @@ class UserB: GeneralUser {
 
     var idRole: String? = null
 
+	var phone: String? = null
+
 	override var name: String? = null
 
 	var username: String? = null
